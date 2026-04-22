@@ -1,10 +1,13 @@
 {
   "name": "dev-ai-kit",
   "version": "1.0.0",
+  "type": "module",
+  "main": "mcp-server/index.js",
   "scripts": {
-    "sync:skills": "node scripts/sync-skills.js"
+    "start": "node mcp-server/index.js"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "fs-extra": "^11.3.4"
   }
 }
