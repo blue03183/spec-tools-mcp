@@ -1,0 +1,10 @@
+{
+  "name": "dev-ai-kit",
+  "version": "1.0.0",
+  "scripts": {
+    "sync:skills": "node scripts/sync-skills.js"
+  },
+  "dependencies": {
+    "fs-extra": "^11.3.4"
+  }
+}
