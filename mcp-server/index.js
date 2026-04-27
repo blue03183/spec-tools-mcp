@@ -29,7 +29,7 @@ server.tool(
   "spec_init",
   "Spec-Driven Development를 위한 프로젝트 초기화. ai-spec/projects/<feature> 폴더 구조와 requirement.md 를 생성한다.",
   {
-    feature: z.string().optional().describe("feature 폴더명 (예: seller-dashboard). 생략 시 AI가 인터뷰한다."),
+    feature: z.string().optional().describe("feature 폴더명 (예: dashboard). 생략 시 AI가 인터뷰한다."),
   },
   async () => readSkill("spec-init")
 );
@@ -39,7 +39,7 @@ server.tool(
   "spec_todo",
   "docs/ 기획서를 분석하여 requirement.md 를 작성·보완하고 todo.md 를 생성한다.",
   {
-    feature: z.string().optional().describe("feature 폴더명 (예: seller-dashboard). 생략 시 AI가 목록을 확인한다."),
+    feature: z.string().optional().describe("feature 폴더명 (예: dashboard). 생략 시 AI가 목록을 확인한다."),
   },
   async () => readSkill("spec-todo")
 );
@@ -49,7 +49,7 @@ server.tool(
   "spec_work",
   "todo.md 항목을 plan.md 작성 → 승인 → 구현 → 완료 보고 순으로 실행한다.",
   {
-    feature: z.string().optional().describe("feature 폴더명 (예: seller-dashboard). 생략 시 AI가 목록을 확인한다."),
+    feature: z.string().optional().describe("feature 폴더명 (예: dashboard). 생략 시 AI가 목록을 확인한다."),
     todo: z.string().optional().describe("진행할 todo 번호 (예: T-01). 생략 시 첫 번째 미완료 항목을 선택한다."),
   },
   async () => readSkill("spec-work")

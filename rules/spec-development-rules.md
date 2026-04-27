@@ -153,44 +153,15 @@ todo.md 는 단순 체크리스트가 아닌 **Self-contained 구현 명세**입
 - 상태: [ ] TODO
 - 대상 파일: `경로/파일명.ts`
 - 작업내용: 구체적인 구현 방법과 힌트
-
-## [T-01E] T-01 E2E 테스트
-- 상태: [ ] TODO
-- 대상 파일: `tests/<feature>/<항목명>.spec.ts`
-- 작업내용: T-01 구현 완료 후 실행. 테스트할 사용자 시나리오와 검증 항목.
 ```
-
-## E2E 테스트 항목 규칙
-
-- 각 구현 todo 항목 `[T-NN]` 에 대응하는 `[T-NNE]` 항목을 **바로 다음에** 생성합니다.
-- `T-NNE` 항목은 대응하는 `T-NN` 구현이 완료된 후에 진행합니다.
-- 테스트 파일 경로는 `tests/<feature>/` 하위에 생성합니다.
-- Playwright 설정 특성상 plan.md 에 다음을 명시합니다:
-  - 의존하는 auth 상태 (`playwright/.auth/user.json`)
-  - 선행 필요 조건 (`pnpm serve:build` 실행 여부 등)
 
 ## todo 예시
 
 ```markdown
-## [T-01] orderSVC.getList 메서드 추가
+## [T-01] getList 메서드 추가
 - 상태: [ ] TODO
-- 대상 파일: `app/scripts/services/orderSVC.js`
-- 작업내용: productSVC.getList 패턴을 참고해서 orderSVC.getList 메서드를 구현합니다.
-
-## [T-01E] T-01 E2E 테스트
-- 상태: [ ] TODO
-- 대상 파일: `tests/orders/orderList.spec.ts`
-- 작업내용: T-01 구현 완료 후 실행. 주문 목록 API 호출 및 목록 렌더링 시나리오 검증.
-
-## [T-02] 주문 목록 컨트롤러 연결
-- 상태: [ ] TODO
-- 대상 파일: `app/scripts/controllers/orderCtrl.js`
-- 작업내용: orderCtrl.js 의 기존 주문 목록 관련 로직(L134 ~)을 수정해서 orderSVC.getList 를 호출하도록 변경합니다.
-
-## [T-02E] T-02 E2E 테스트
-- 상태: [ ] TODO
-- 대상 파일: `tests/orders/orderList.spec.ts`
-- 작업내용: T-02 구현 완료 후 실행. 컨트롤러에서 목록이 정상적으로 바인딩되는지 검증.
+- 대상 파일: `src/services/order.js`
+- 작업내용: product.getList 패턴을 참고해서 order.getList 메서드를 구현합니다.
 ```
 
 ---

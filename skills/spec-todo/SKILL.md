@@ -1,7 +1,7 @@
 ---
 name: spec-todo
 description: "Spec-Driven Development의 요구사항 분석 및 todo 생성 스킬. docs/ 폴더의 기획서를 분석하여 requirement.md 를 작성·수정하고, 워크스페이스 탐색 후 todo.md 를 생성한다. docs 분석, requirement 작성, 기획서 분석, todo 작성, todo 생성 요청 시 사용한다."
-argument-hint: "feature 폴더명 (예: seller-dashboard, order-management). 생략 시 AI가 feature 목록을 확인하여 선택을 요청한다."
+argument-hint: "feature 폴더명 (예: insights, dashboard). 생략 시 AI가 feature 목록을 확인하여 선택을 요청한다."
 ---
 
 # Spec Todo 스킬
