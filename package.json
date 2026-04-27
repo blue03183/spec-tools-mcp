@@ -1,11 +1,21 @@
 {
   "name": "spec-tools-mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Spec-driven toolkit for AI agents — skills, rules & prompts via MCP",
   "type": "module",
   "main": "mcp-server/index.js",
-  "files": ["mcp-server/", "skills/", "rules/"],
-  "keywords": ["mcp", "ai", "spec-driven", "agent", "copilot"],
+  "files": [
+    "mcp-server/",
+    "skills/",
+    "rules/"
+  ],
+  "keywords": [
+    "mcp",
+    "ai",
+    "spec-driven",
+    "agent",
+    "copilot"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
