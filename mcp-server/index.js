@@ -13,7 +13,7 @@ const SKILLS_DIR = path.join(KIT_ROOT, "skills");
 const RULES_DIR = path.join(KIT_ROOT, "rules");
 
 const server = new McpServer({
-  name: "dev-ai-kit",
+  name: "spec-driven-mcp",
   version: "1.0.0",
 });
 

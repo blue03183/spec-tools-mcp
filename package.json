@@ -1,5 +1,5 @@
 {
-  "name": "dev-ai-kit",
+  "name": "spec-driven-mcp",
   "version": "1.0.0",
   "type": "module",
   "main": "mcp-server/index.js",
