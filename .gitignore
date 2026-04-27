@@ -1,2 +1,10 @@
 node_modules
 .npmrc
+ai-spec/*
+.claude/*
+.mcp.json
+mcp-server/index.js
+mcp-server/index.d.ts
+mcp-server/index.d.ts.map
+mcp-server/*.js.map
+analysis-comparison.md
