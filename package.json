@@ -1,6 +1,6 @@
 {
   "name": "spec-tools-mcp",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Spec-driven toolkit for AI agents — skills, rules & prompts via MCP",
   "type": "module",
   "main": "mcp-server/index.js",
