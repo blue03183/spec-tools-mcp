@@ -1,4 +1,4 @@
-# Spec-Driven MCP
+# Spec-Tools-MCP
 
 AI 에이전트용 Skills · 규칙 · 프롬프트를 MCP로 제공하는 중앙 저장소입니다.
 
