@@ -5,6 +5,7 @@
   "type": "module",
   "main": "mcp-server/index.js",
   "files": [
+    "README.md",
     "mcp-server/",
     "skills/",
     "rules/"
