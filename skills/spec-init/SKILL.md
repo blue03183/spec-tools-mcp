@@ -1,7 +1,7 @@
 ---
 name: spec-init
 description: "Spec-Driven Development를 위한 프로젝트 초기화 스킬. ai-spec/projects 폴더 하위에 feature 폴더 구조를 확인·생성하고, requirement.md 템플릿과 docs/ 폴더를 셋업한다. spec 초기화, spec 생성, 새 기능 시작 요청 시 사용한다."
-argument-hint: "feature 폴더명 (예: seller-dashboard, order-management). 생략 시 AI가 요구사항을 먼저 인터뷰한다."
+argument-hint: "feature 폴더명 (예: dashboard, order-management). 생략 시 AI가 요구사항을 먼저 인터뷰한다."
 ---
 
 # Spec 프로젝트 초기화 스킬
@@ -43,7 +43,7 @@ docs 분석 및 requirement.md 작성, todo.md 생성은 **spec-todo 스킬**에
 
 ```
 1. Feature명 (폴더명으로 사용됩니다. 영문 소문자, 하이픈 사용 권장)
-   예) seller-dashboard, order-bulk-edit, keyword-analysis
+   예) dashboard, order-management, product-analysis
 
 2. 기능 요약 (한 줄로 설명)
 

@@ -61,7 +61,7 @@ requirement 작성해줘
 질문: 어떤 feature 를 진행할까요?
 
 선택지: [폴더 목록 동적 생성]
-  - seller-dashboard
+  - dashboard
   - order-management
   - ...
   [직접 입력 허용]
