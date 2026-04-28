@@ -130,7 +130,25 @@ By default, spec files are stored under `ai-spec/` at the project root. To use a
 }
 ```
 
-#### 5. How to Use Skills
+#### 5. Restart & Verify
+
+After adding the MCP configuration, **restart your AI agent** (reload the IDE window or restart the chat session) so the new server is picked up.
+
+**Verify the connection** by asking the AI:
+
+```
+What MCP tools are available?
+```
+
+Or call `get_rules` directly:
+
+```
+get_rules
+```
+
+If the server is connected, the AI will list the four tools (`spec_init`, `spec_todo`, `spec_work`, `get_rules`) or return the development rules document.
+
+#### 6. How to Use Skills
 
 Once the MCP server is connected, request skills in natural language from the AI chat.
 
@@ -154,7 +172,7 @@ Analyze requirements with spec_todo
 Work on T-01 with spec_work
 ```
 
-#### 6. Available Tools
+#### 7. Available Tools
 
 | Tool | Description | Example |
 |------|-------------|---------|
@@ -163,7 +181,7 @@ Work on T-01 with spec_work
 | `spec_work` | Write a plan for a todo item → approve → implement | `Work on T-01 with spec_work` |
 | `get_rules` | Return the contents of spec-development-rules.md | `Show me the development rules` |
 
-#### 7. Workflow
+#### 8. Workflow
 
 1. **Initialize** the project with `spec_init`
    - Creates an `ai-spec/projects/{project-name}/` folder with `requirement.md` template and optional `docs/` folder
