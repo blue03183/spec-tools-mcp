@@ -57,9 +57,9 @@ npm install spec-tools-mcp
 
 #### 3. IDE Setup
 
-**VS Code** (`.vscode/mcp.json`) — use Option A or Option B above
+**VS Code + GitHub Copilot** (`.vscode/mcp.json`) — use Option A or Option B above
 
-**Claude Code** (`.claude/settings.json`):
+**Claude Code** (`.mcp.json`):
 
 ```json
 {
@@ -83,6 +83,14 @@ npm install spec-tools-mcp
     }
   }
 }
+```
+
+**Codex** (`.codex/config.toml`):
+
+```toml
+[mcp_servers.spec-tools-mcp]
+command = "npx"
+args = ["-y", "spec-tools-mcp"]
 ```
 
 **Cursor** (`.cursor/mcp.json`):
