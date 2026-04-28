@@ -11,10 +11,17 @@
   ],
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "ai",
+    "llm",
     "spec-driven",
     "agent",
-    "copilot"
+    "copilot",
+    "github-copilot",
+    "claude",
+    "claude-code",
+    "workflow",
+    "multi-project"
   ],
   "license": "MIT",
   "repository": {
