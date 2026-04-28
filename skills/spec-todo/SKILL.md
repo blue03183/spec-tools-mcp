@@ -38,7 +38,7 @@ requirement 작성해줘
 
 ## 사전 조건 확인
 
-스킬 진입 시 가장 먼저 `rules/spec-development-rules.md` 를 읽어 모든 규칙을 숙지한다.
+스킬 진입 시 가장 먼저 `get_rules` MCP 도구를 호출하여 모든 규칙을 숙지한다.
 
 **질문 도구 선택**: 이 문서에서 "질문 도구"는 실행 환경에 따라 아래 도구를 사용한다.
 
@@ -108,7 +108,7 @@ requirement.md 가 없거나 템플릿 상태인 경우, 새로 생성하기 전
 |-----------|--------------|-----------|
 | `ai-spec/templates/requirement.md` | 해당 파일 내용을 템플릿으로 사용 | 아래 기본 템플릿 사용 |
 
-> 커스텀 템플릿을 사용하더라도 `requirement.md` 첫 줄의 spec-development-rules.md 참조 지시문은 반드시 포함한다.
+> 커스텀 템플릿을 사용하더라도 `requirement.md` 첫 줄의 get_rules 참조 지시문은 반드시 포함한다.
 
 **기존 requirement.md 가 있는 경우:**
 - 현재 내용을 먼저 읽는다.
@@ -131,7 +131,7 @@ requirement.md 가 없거나 템플릿 상태인 경우, 새로 생성하기 전
 - 아래 템플릿을 기반으로 내용을 채워 새로 생성한다.
 
 ```markdown
-# ai-spec/rules/spec-development-rules.md 파일의 규칙을 준수하여 작업을 진행해주세요.
+# 이 문서로 작업 시작 전, spec-tools-mcp 의 get_rules 도구를 호출하여 개발 규칙을 확인하세요.
 
 # <Feature명> 요구사항
 
@@ -359,9 +359,9 @@ todo 목록을 검토한 후 구현을 시작하세요.
 
 ## 처리 규칙
 
-- 스킬 시작 시 반드시 `rules/spec-development-rules.md` 를 읽고 모든 절차를 준수한다.
+- 스킬 시작 시 반드시 `get_rules` MCP 도구를 호출하고 모든 절차를 준수한다.
 - `requirement.md` 가 없거나 완전히 비어있으면 todo.md 를 생성하지 않는다.
-- `requirement.md` 첫 줄에는 반드시 spec-development-rules.md 참조 지시문이 포함되어야 한다. 없는 경우 추가한다.
+- `requirement.md` 첫 줄에는 반드시 get_rules 참조 지시문이 포함되어야 한다. 없는 경우 추가한다.
 - `docs/` 폴더가 없거나 폴더에 파일이 없으면 문서 분석을 건너뛰고 기존 requirement.md 를 기반으로 작업을 진행한다.
 - 분석 결과는 채팅에 출력하지 않고 requirement.md 파일에 직접 저장한다. 파일 경로만 안내하고 사용자가 파일을 검토·수정하도록 한다.
 - 이미 작성된 requirement.md 의 내용은 사용자 확인 없이 덮어쓰지 않는다.
