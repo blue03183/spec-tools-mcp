@@ -13,11 +13,24 @@ const SKILLS_DIR = path.join(KIT_ROOT, "skills");
 const RULES_DIR = path.join(KIT_ROOT, "rules");
 const SPEC_ROOT_DIR: string = process.env.SPEC_ROOT_DIR ?? "ai-spec";
 
+const fileCache = new Map<string, string>();
+
+async function cachedRead(filePath: string): Promise<string> {
+  const cached = fileCache.get(filePath);
+  if (cached !== undefined) return cached;
+  const content: string = await fs.readFile(filePath, "utf-8");
+  fileCache.set(filePath, content);
+  return content;
+}
+
+function buildPrefix(label: string): string {
+  return `> **[SPEC_ROOT_DIR]** 스펙 파일 루트 경로: \`${SPEC_ROOT_DIR}\`\n> ${label} 내 \`ai-spec/\` 경로가 나오면 이 값으로 대체하여 사용하세요.\n\n`;
+}
+
 async function readSkill(skillName: string) {
   const skillPath = path.join(SKILLS_DIR, skillName, "SKILL.md");
-  const content: string = await fs.readFile(skillPath, "utf-8");
-  const prefix = `> **[SPEC_ROOT_DIR]** 스펙 파일 루트 경로: \`${SPEC_ROOT_DIR}\`\n> SKILL.md 내 \`ai-spec/\` 경로가 나오면 이 값으로 대체하여 사용하세요.\n\n`;
-  return { content: [{ type: "text" as const, text: prefix + content }] };
+  const content = await cachedRead(skillPath);
+  return { content: [{ type: "text" as const, text: buildPrefix("SKILL.md") + content }] };
 }
 
 export function createServer() {
@@ -60,9 +73,8 @@ export function createServer() {
     {},
     async () => {
       const rulesPath = path.join(RULES_DIR, "spec-development-rules.md");
-      const content: string = await fs.readFile(rulesPath, "utf-8");
-      const prefix = `> **[SPEC_ROOT_DIR]** 스펙 파일 루트 경로: \`${SPEC_ROOT_DIR}\`\n> 규칙 내 \`ai-spec/\` 경로가 나오면 이 값으로 대체하여 사용하세요.\n\n`;
-      return { content: [{ type: "text" as const, text: prefix + content }] };
+      const content = await cachedRead(rulesPath);
+      return { content: [{ type: "text" as const, text: buildPrefix("규칙") + content }] };
     }
   );
 
