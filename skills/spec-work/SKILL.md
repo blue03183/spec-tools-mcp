@@ -34,21 +34,14 @@ plan 작성해줘
 
 ## 사전 조건 확인
 
-스킬 진입 시 가장 먼저 `get_rules` MCP 도구를 호출하여 모든 규칙을 숙지한다.
+이 세션에서 `get_rules`를 아직 호출하지 않은 경우에만 호출한다. 이미 호출한 경우 생략한다.
+질문 도구 선택 및 공통 규칙은 rules의 `Common — 스킬 공통 규칙` 참조.
 이후 다음 파일이 존재하는지 확인한다.
-
-**질문 도구 선택**: 이 문서에서 "질문 도구"는 실행 환경에 따라 아래 도구를 사용한다.
-
-| 환경 | 사용 도구 |
-|------|-----------|
-| Copilot (VS Code) | `vscode_askQuestions` |
-| Claude Code | `AskUserQuestion` |
 
 | 파일 | 없을 경우 처리 |
 |------|--------------|
-| `get_rules` MCP 도구 | 호출하여 규칙 숙지 (필수) |
 | `ai-spec/projects/<feature>/requirement.md` | 사용자에게 spec-init 스킬로 먼저 초기화하도록 안내 |
-| `ai-spec/projects/<feature>/todo.md` | 사용자에게 todo.md 가 없음을 알리고 spec-init 스킬로 진행하도록 안내 |
+| `ai-spec/projects/<feature>/todo.md` | 사용자에게 todo.md 가 없음을 알리고 spec-todo 스킬로 진행하도록 안내 |
 
 ---
 
@@ -273,7 +266,6 @@ todo.md 의 모든 항목이 완료되었습니다.
 
 ## 처리 규칙
 
-- 스킬 시작 시 반드시 `get_rules` MCP 도구를 호출하고 모든 절차를 준수한다.
 - `requirement.md` 가 없으면 구현을 시작하지 않는다.
 - `todo.md` 가 없으면 구현을 시작하지 않는다.
 - plan.md Approval Status 가 `[승인]` 이 아니면 코드를 작성하지 않는다.
