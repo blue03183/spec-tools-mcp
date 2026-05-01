@@ -1,3 +1,5 @@
+[한국어](README.ko.md) | [中文](README.zh.md) | **English** | [日本語](README.ja.md)
+
 # Spec-Tools-MCP
 
 A centralized MCP server that provides spec-driven AI agent skills, rules, and prompts across projects.
@@ -234,3 +236,13 @@ ai-spec
 
 - If your project has a `CLAUDE.md` or `copilot-instructions.md` that describes the folder structure, key file paths, and tech stack, the AI can skip broad codebase exploration and focus immediately on relevant files.
 - When context grows too long, AI accuracy can degrade. It is recommended to start a new session for each TODO item. Pass the task number directly (e.g. `spec_work T-02`) to jump straight to that item.
+
+---
+
+## Contributing
+
+Contributions are always welcome! If you find a bug or have a feature request, please [open an issue](https://github.com/blue03183/spec-tools-mcp/issues). Pull requests are also greatly appreciated.
+
+## License
+
+MIT
