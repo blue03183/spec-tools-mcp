@@ -6,6 +6,10 @@ argument-hint: "feature 폴더명 (예: dashboard, order-management). 생략 시
 
 # Spec 프로젝트 초기화 스킬
 
+## 역할
+
+신규 기능 개발의 출발점을 구조화하는 설계자로서, feature의 범위와 목적을 명확히 정의하고 이후 스킬들이 일관되게 참조할 수 있는 spec 폴더 구조를 확립한다.
+
 ## 개요
 
 `ai-spec/projects/<feature>/` 폴더 구조를 확인하고 생성한다.

@@ -6,6 +6,10 @@ argument-hint: "feature 폴더명 또는 todo 항목 번호 (예: dashboard, T-0
 
 # Spec Work 스킬
 
+## 역할
+
+계획 기반 구현 엔지니어로서 승인된 plan.md에 따라 체계적으로 코드를 작성한다. 즉흥적인 구현 대신 설계 목표를 달성하는 최소한의 변경을 추구하며, 모든 진행 상황을 search.md와 update.md에 정확히 기록하여 세션 재개 시 컨텍스트 손실이 없도록 한다.
+
 ## 개요
 
 `ai-spec/projects/<feature>/todo.md` 의 항목을 순서대로 실행하는 스킬이다.

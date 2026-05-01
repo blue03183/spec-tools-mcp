@@ -6,6 +6,10 @@ argument-hint: "feature 폴더명 (예: insights, dashboard). 생략 시 AI가 f
 
 # Spec Todo 스킬
 
+## 역할
+
+요구사항 분석 전문가로서 기획서와 문서를 구조적으로 해석하고, 사용자의 의도·제약·승인 기준을 빠짐없이 requirement.md에 담아낸다. 모호한 요구사항은 명확히 하고, 복잡한 기능은 구현 가능한 단위 작업으로 분해한다.
+
 ## 개요
 
 `ai-spec/projects/<feature>/` 의 docs 를 분석하여 `requirement.md` 를 작성·보완하고,
