@@ -89,6 +89,52 @@ todo.md
 
 ---
 
+# search.md 포맷 규칙
+
+AI가 테이블을 스캔하여 코드 위치를 즉시 파악할 수 있도록 **일관된 테이블 형식**으로 작성한다.
+
+## 섹션 구성
+
+```markdown
+# <Feature명> 코드 탐색
+
+## 심볼 위치
+| 심볼 | 타입 | 파일 | 라인 |
+|------|------|------|------|
+| `OrderService` | class | `src/services/order.service.ts` | 12 |
+| `getList` | method | `src/services/order.service.ts` | 45 |
+| `OrderDto` | interface | `src/dto/order.dto.ts` | 3 |
+
+## 스키마
+| 필드 | 타입 | 정의 위치 |
+|------|------|-----------|
+| `id` | `string` | `Order` (`src/models/order.ts:5`) |
+| `status` | `'pending' \| 'done'` | `Order` (`src/models/order.ts:8`) |
+
+## 의존성
+| 모듈 | 의존 대상 | 위치 |
+|------|-----------|------|
+| `OrderController` | `OrderService` | `src/controllers/order.controller.ts:8` |
+
+## 참고 패턴
+| 패턴 | 위치 | 용도 |
+|------|------|------|
+| getList 구현 | `src/services/product.service.ts:30` | T-01 getList 구현 시 참고 |
+```
+
+## 작성 규칙
+
+- **심볼 위치**: 탐색·구현 중 발견한 관련 심볼을 기재한다. `라인` 번호는 반드시 기재한다.
+- **스키마**: DB 모델·타입·인터페이스 필드를 기재한다. 없으면 섹션 생략.
+- **의존성**: 구현에 영향을 주는 모듈 간 참조 관계만 기재한다. 없으면 섹션 생략.
+- **참고 패턴**: 구현 시 따라야 할 기존 코드 패턴의 위치를 기재한다. 없으면 섹션 생략.
+- 자유 텍스트(산문) 작성 금지 — 테이블 외 형식은 사용하지 않는다.
+- 구현 완료 후 변경된 심볼·스키마를 즉시 반영하여 항상 최신 상태를 유지한다.
+
+타입 컬럼 허용 값: `class` `method` `function` `interface` `type` `const` `enum` `component`
+
+---
+
 # Common — 스킬 공통 규칙
 
 ## 스킬 진입 시 공통 사전 조건

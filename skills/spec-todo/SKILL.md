@@ -252,19 +252,26 @@ requirement.md 가 아직 작성되지 않았습니다.
 
 **search.md 템플릿**
 
+포맷 규칙은 rules 의 `search.md 포맷 규칙` 참조.
+
 ```markdown
 # <Feature명> 코드 탐색
 
-## 관련 파일 위치
-| 역할 | 파일 경로 | 비고 |
-|------|-----------|------|
-| (예) 서비스 | `app/scripts/services/orderSVC.js` | getList 패턴 참고 |
+## 심볼 위치
+| 심볼 | 타입 | 파일 | 라인 |
+|------|------|------|------|
+| `OrderService` | class | `src/services/order.service.ts` | 12 |
+| `getList` | method | `src/services/order.service.ts` | 45 |
 
-## 데이터 스키마
-(관련 타입·인터페이스 정의 위치 및 내용)
+## 스키마
+| 필드 | 타입 | 정의 위치 |
+|------|------|-----------|
+| `id` | `string` | `Order` (`src/models/order.ts:5`) |
 
 ## 참고 패턴
-(유사 구현 사례 및 위치)
+| 패턴 | 위치 | 용도 |
+|------|------|------|
+| getList 구현 | `src/services/product.service.ts:30` | T-01 구현 시 참고 |
 ```
 
 ---
