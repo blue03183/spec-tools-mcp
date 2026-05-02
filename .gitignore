@@ -8,3 +8,4 @@ mcp-server/index.d.ts
 mcp-server/index.d.ts.map
 mcp-server/*.js.map
 analysis-comparison.md
+test

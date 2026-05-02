@@ -182,6 +182,32 @@ Work on T-01 with spec_work
 | `spec_todo` | Analyze planning docs and generate requirement.md · todo.md | `Analyze requirements with spec_todo` |
 | `spec_work` | Write a plan for a todo item → approve → implement | `Work on T-01 with spec_work` |
 | `get_rules` | Return the contents of spec-development-rules.md | `Show me the development rules` |
+| `spec_status` | Show todo progress and pending approvals across all features | `Show current spec status` |
+| `spec_handoff` | Generate a handoff document so another developer or session can resume immediately | `Create handoff doc for dashboard` |
+| `spec_archive` | Move a completed feature from `projects/` to `archive/` | `Archive the dashboard feature` |
+
+**Tool roles and expected effects**
+
+**`spec_init`**  
+Call when starting a new feature. Creates an isolated workspace under `ai-spec/projects/<feature>/` so multiple features or developers can work in the same repository without file conflicts.
+
+**`spec_todo`**  
+Run after planning documents are ready. Analyzes files in `docs/`, writes `requirement.md`, and generates self-contained task items in `todo.md` — acting as a human review checkpoint before any implementation begins.
+
+**`spec_work`**  
+Use when starting implementation or resuming a prior session. Enforces a plan → approval → code gate: writes `plan.md` first, blocks implementation until a human approves, then records each step in `update.md` so work resumes from exactly where it left off.
+
+**`get_rules`**  
+Call when the AI needs to recall the full development protocol. Returns the entire `spec-development-rules.md` to ensure the AI follows the correct spec-driven workflow.
+
+**`spec_status`**  
+Use when multiple features are in flight and you need a project-wide view. Shows todo completion rates and all pending plans at a glance, so no approval requests fall through the cracks.
+
+**`spec_handoff`**  
+Use when handing off work to a teammate or pausing a feature for an extended period. Compiles goals, todo status, and key code locations into a single document so the next session or developer can resume without re-scanning the codebase.
+
+**`spec_archive`**  
+Call once a feature is fully complete. Moves the feature folder to `ai-spec/archive/`, keeping `projects/` clean and limited to active work. Blocked if any todo item is still incomplete.
 
 #### 8. Workflow
 
@@ -201,6 +227,7 @@ Work on T-01 with spec_work
    - AI writes `plan.md` for the selected task and asks for your approval
    - You review the plan file directly — no need to describe changes in chat; edit `plan.md` and type `revision done` if changes are needed
    - Type `approved` or `proceed` to start implementation
+   - The server enforces the approval gate: if `plan.md` is still `[pending]`, implementation is blocked at the MCP level
    - Progress is recorded in `update.md` as each step completes
 
 5. **Resume anytime** by starting a new session and calling `spec_work` again
@@ -208,6 +235,12 @@ Work on T-01 with spec_work
    - `search.md` caches discovered code locations so the AI doesn't re-scan the codebase on each session
 
 6. Repeat steps 3–4 for each subsequent task
+
+7. **When handing off** work to another developer, request a handoff document
+   - `spec_handoff` generates a concise summary of goals, todo status, current progress, and key code locations
+
+8. **When a feature is complete**, archive it to keep `projects/` clean
+   - `spec_archive` moves the folder to `ai-spec/archive/` — blocked if any todo is still incomplete
 
 #### 8. Generated Folder Structure
 

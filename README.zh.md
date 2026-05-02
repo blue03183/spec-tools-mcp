@@ -182,6 +182,32 @@ MCP 服务器连接后，在 AI 聊天中用自然语言请求技能。
 | `spec_todo` | 分析规划文档，生成 requirement.md · todo.md | `用 spec_todo 分析需求` |
 | `spec_work` | 为 todo 项编写计划 → 审批 → 实现 | `用 spec_work 处理 T-01` |
 | `get_rules` | 返回 spec-development-rules.md 的内容 | `显示开发规则` |
+| `spec_status` | 显示所有 feature 的 todo 进度和待审批项 | `显示当前规范状态` |
+| `spec_handoff` | 生成交接文档，让其他开发者或新会话能立即接手 | `为 dashboard 生成交接文档` |
+| `spec_archive` | 将已完成的 feature 从 `projects/` 移至 `archive/` | `归档 dashboard feature` |
+
+**工具角色与预期效果**
+
+**`spec_init`**  
+新功能开发开始时调用。在 `ai-spec/projects/<feature>/` 下创建独立的工作空间，使多个功能或开发者可以在同一仓库中无文件冲突地协作。
+
+**`spec_todo`**  
+规划文档准备就绪后执行。分析 `docs/` 中的文件，生成 `requirement.md` 和包含自包含任务的 `todo.md`——在实现开始前充当人机共同审阅需求的检查点。
+
+**`spec_work`**  
+开始实现或接手上一会话时使用。强制执行计划 → 审批 → 实现的门控流程：先写 `plan.md`，人工审批后才能推进，并将每步进展记录到 `update.md`，确保跨会话精确续接。
+
+**`get_rules`**  
+AI 需要回顾完整开发协议或确认工作方式时调用。返回完整的 `spec-development-rules.md`，确保 AI 遵循正确的规范驱动流程。
+
+**`spec_status`**  
+多个功能同时推进、需要全局进度总览时使用。一目了然地显示所有 feature 的 todo 完成率及待审批计划，避免遗漏任何审批请求。
+
+**`spec_handoff`**  
+向队友交接工作或需要长期暂停某功能时使用。将功能目标、todo 状态和关键代码位置整合为一份文档，让下一个会话或开发者无需重新扫描代码库即可立即接手。
+
+**`spec_archive`**  
+功能完全完成后调用。将 feature 文件夹移至 `ai-spec/archive/`，保持 `projects/` 仅保留活跃工作。若存在未完成的 todo 则会被阻止。
 
 #### 8. 工作流程
 
@@ -201,6 +227,7 @@ MCP 服务器连接后，在 AI 聊天中用自然语言请求技能。
    - AI 为选定任务编写 `plan.md` 并请求审批
    - 直接审阅计划文件——无需在聊天中描述变更；编辑 `plan.md` 后输入 `修改完成` 即可
    - 输入 `审批` 或 `继续` 开始实现
+   - 审批门控在 MCP 服务器层强制执行：若 `plan.md` 仍为 `[待审批]` 状态，实现将被阻止
    - 每个步骤完成时，进度记录在 `update.md` 中
 
 5. 开启新会话并再次调用 `spec_work` 即可**随时恢复**
@@ -208,6 +235,12 @@ MCP 服务器连接后，在 AI 聊天中用自然语言请求技能。
    - `search.md` 缓存已发现的代码位置，AI 无需每次会话都重新扫描代码库
 
 6. 对每个后续任务重复步骤 3–4
+
+7. **移交工作**时请求交接文档
+   - `spec_handoff` 生成包含功能目标、todo 状态、当前进度和关键代码位置的简洁文档
+
+8. **功能完成**后归档以保持 `projects/` 整洁
+   - `spec_archive` 将文件夹移至 `ai-spec/archive/`——若有未完成的 todo 则会阻止操作
 
 #### 9. 生成的文件夹结构
 
