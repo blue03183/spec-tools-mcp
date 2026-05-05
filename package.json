@@ -6,6 +6,7 @@
   "main": "mcp-server/index.js",
   "files": [
     "README.md",
+    "bin/",
     "mcp-server/",
     "skills/",
     "rules/"
@@ -30,7 +31,7 @@
     "url": "https://github.com/blue03183/spec-tools-mcp.git"
   },
   "bin": {
-    "spec-tools-mcp": "./mcp-server/index.js"
+    "spec-tools-mcp": "./bin/cli.js"
   },
   "types": "mcp-server/index.d.ts",
   "scripts": {

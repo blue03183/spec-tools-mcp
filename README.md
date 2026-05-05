@@ -29,7 +29,17 @@ npm install spec-tools-mcp
 
 #### 2. Configure MCP Server
 
-**Option A — Run with npx (no local install required)**
+**Option A — Auto-configure (recommended)**
+
+Run the following command in your project root:
+
+```bash
+npx spec-tools-mcp init
+```
+
+This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes the correct config file for each one automatically. Already-configured entries are skipped.
+
+**Option B — Run with npx (manual)**
 
 ```json
 {
@@ -43,7 +53,7 @@ npm install spec-tools-mcp
 }
 ```
 
-**Option B — Use local installation path**
+**Option C — Use local installation path**
 
 ```json
 {
@@ -59,7 +69,7 @@ npm install spec-tools-mcp
 
 #### 3. IDE Setup
 
-**VS Code + GitHub Copilot** (`.vscode/mcp.json`) — use Option A or Option B above
+**VS Code + GitHub Copilot** (`.vscode/mcp.json`) — use Option B or Option C above, or run `npx spec-tools-mcp init`
 
 **Claude Code** (`.mcp.json`):
 
@@ -185,6 +195,7 @@ Work on T-01 with spec_work
 | `spec_status` | Show todo progress and pending approvals across all features | `Show current spec status` |
 | `spec_handoff` | Generate a handoff document so another developer or session can resume immediately | `Create handoff doc for dashboard` |
 | `spec_archive` | Move a completed feature from `projects/` to `archive/` | `Archive the dashboard feature` |
+| `spec_search` | Return code locations and symbols from `search.md`; filter by keyword if `query` is provided | `Search for OrderService in dashboard` |
 
 **Tool roles and expected effects**
 
@@ -195,7 +206,7 @@ Call when starting a new feature. Creates an isolated workspace under `ai-spec/p
 Run after planning documents are ready. Analyzes files in `docs/`, writes `requirement.md`, and generates self-contained task items in `todo.md` — acting as a human review checkpoint before any implementation begins.
 
 **`spec_work`**  
-Use when starting implementation or resuming a prior session. Enforces a plan → approval → code gate: writes `plan.md` first, blocks implementation until a human approves, then records each step in `update.md` so work resumes from exactly where it left off.
+Use when starting implementation or resuming a prior session. Enforces a plan → approval → code gate: writes `plan.md` first, blocks implementation until a human approves, then records each step in `update.md` so work resumes from exactly where it left off. If any file paths recorded in `search.md` no longer exist, a warning is shown automatically.
 
 **`get_rules`**  
 Call when the AI needs to recall the full development protocol. Returns the entire `spec-development-rules.md` to ensure the AI follows the correct spec-driven workflow.
@@ -208,6 +219,9 @@ Use when handing off work to a teammate or pausing a feature for an extended per
 
 **`spec_archive`**  
 Call once a feature is fully complete. Moves the feature folder to `ai-spec/archive/`, keeping `projects/` clean and limited to active work. Blocked if any todo item is still incomplete.
+
+**`spec_search`**  
+Use when you need to look up file locations or symbols cached in `search.md` without opening the file manually. Pass an optional `query` keyword to return only the matching sections. Useful for quickly finding where a class or function was last recorded.
 
 #### 8. Workflow
 

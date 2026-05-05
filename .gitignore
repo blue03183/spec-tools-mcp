@@ -9,3 +9,4 @@ mcp-server/index.d.ts.map
 mcp-server/*.js.map
 analysis-comparison.md
 test
+spec-update.md

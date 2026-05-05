@@ -107,6 +107,23 @@ async function findUpdateMd(featDir: string, todoId: string): Promise<string | n
   }
 }
 
+function extractFilePaths(content: string): string[] {
+  const raw: string[] = [];
+  for (const m of content.matchAll(/`([^`]+\.[a-zA-Z]{1,5}(?::\d+)?)`/g)) {
+    const p = m[1].replace(/:\d+$/, "");
+    if (p.includes("/") && !p.includes(" ")) raw.push(p);
+  }
+  return [...new Set(raw)];
+}
+
+async function findStalePaths(content: string): Promise<string[]> {
+  const stale: string[] = [];
+  for (const p of extractFilePaths(content)) {
+    if (!(await fs.pathExists(path.resolve(process.cwd(), p)))) stale.push(p);
+  }
+  return stale;
+}
+
 // ── 서버 ──────────────────────────────────────────────────────────────────────
 
 export function createServer() {
@@ -144,32 +161,43 @@ export function createServer() {
     },
     async ({ feature, todo }) => {
       const skillText = await readSkillText("spec-work");
+      let prefix = "";
 
-      if (feature && todo) {
-        const todoId = todo.toUpperCase();
+      if (feature) {
         const featDir = path.join(specProjectsPath(), feature);
-        const planPath = await findPlanMd(featDir, todoId);
-
-        if (planPath) {
-          const status = await readApprovalStatus(planPath);
-          const rel = path.relative(process.cwd(), planPath);
-
-          if (status === "[대기]") {
-            const msg = `> ⚠️ **승인 게이트**: \`${todoId}\` plan.md 가 **[대기]** 상태입니다.\n> plan.md 를 검토 후 Approval Status 를 \`[승인]\` 으로 변경하거나, 채팅에 "승인" 을 입력하세요.\n> 경로: \`${rel}\`\n\n`;
-            return { content: [{ type: "text" as const, text: msg + skillText }] };
+        const searchPath = path.join(featDir, "search.md");
+        if (await fs.pathExists(searchPath)) {
+          const stalePaths = await findStalePaths(await fs.readFile(searchPath, "utf-8"));
+          if (stalePaths.length > 0) {
+            prefix += `> ⚠️ **search.md 유효성 경고**: 다음 경로가 존재하지 않습니다. search.md 를 업데이트하세요.\n${stalePaths.map(p => `> - \`${p}\``).join("\n")}\n\n`;
           }
-          if (status === "[수정]") {
-            const msg = `> 🔄 **수정 요청 상태**: \`${todoId}\` plan.md 에 수정 요청이 있습니다.\n> User Feedback 을 반영하여 plan.md 를 업데이트한 후 "수정 완료" 를 입력하세요.\n> 경로: \`${rel}\`\n\n`;
-            return { content: [{ type: "text" as const, text: msg + skillText }] };
-          }
-          if (status === "[승인]") {
-            const msg = `> ✅ **승인 확인**: \`${todoId}\` plan.md 가 **[승인]** 상태입니다. 구현을 진행합니다.\n\n`;
-            return { content: [{ type: "text" as const, text: msg + skillText }] };
+        }
+
+        if (todo) {
+          const todoId = todo.toUpperCase();
+          const planPath = await findPlanMd(featDir, todoId);
+
+          if (planPath) {
+            const status = await readApprovalStatus(planPath);
+            const rel = path.relative(process.cwd(), planPath);
+
+            if (status === "[대기]") {
+              prefix += `> ⚠️ **승인 게이트**: \`${todoId}\` plan.md 가 **[대기]** 상태입니다.\n> plan.md 를 검토 후 Approval Status 를 \`[승인]\` 으로 변경하거나, 채팅에 "승인" 을 입력하세요.\n> 경로: \`${rel}\`\n\n`;
+              return { content: [{ type: "text" as const, text: prefix + skillText }] };
+            }
+            if (status === "[수정]") {
+              prefix += `> 🔄 **수정 요청 상태**: \`${todoId}\` plan.md 에 수정 요청이 있습니다.\n> User Feedback 을 반영하여 plan.md 를 업데이트한 후 "수정 완료" 를 입력하세요.\n> 경로: \`${rel}\`\n\n`;
+              return { content: [{ type: "text" as const, text: prefix + skillText }] };
+            }
+            if (status === "[승인]") {
+              prefix += `> ✅ **승인 확인**: \`${todoId}\` plan.md 가 **[승인]** 상태입니다. 구현을 진행합니다.\n\n`;
+              return { content: [{ type: "text" as const, text: prefix + skillText }] };
+            }
           }
         }
       }
 
-      return { content: [{ type: "text" as const, text: skillText }] };
+      return { content: [{ type: "text" as const, text: prefix + skillText }] };
     }
   );
 
@@ -342,6 +370,41 @@ export function createServer() {
       }
 
       return { content: [{ type: "text" as const, text: doc }] };
+    }
+  );
+
+  server.tool(
+    "spec_search",
+    "feature의 search.md에서 코드 위치·심볼·스키마를 반환한다. query를 지정하면 해당 키워드가 포함된 섹션만 반환한다.",
+    {
+      feature: z.string().describe("feature 폴더명 (예: dashboard)"),
+      query: z.string().optional().describe("필터링 키워드 (예: OrderService). 생략 시 전체 반환"),
+    },
+    async ({ feature, query }) => {
+      const searchPath = path.join(specProjectsPath(), feature, "search.md");
+
+      if (!(await fs.pathExists(searchPath))) {
+        return { content: [{ type: "text" as const, text: `❌ \`${feature}/search.md\` 가 없습니다. 아직 코드 탐색이 진행되지 않았습니다.` }] };
+      }
+
+      const content = await fs.readFile(searchPath, "utf-8");
+
+      if (!query) {
+        return { content: [{ type: "text" as const, text: content }] };
+      }
+
+      const lower = query.toLowerCase();
+      const headerMatch = content.match(/^# .+/m);
+      const header = headerMatch ? headerMatch[0] + "\n\n" : "";
+
+      const sections = content.split(/(?=^## )/m);
+      const matched = sections.filter(s => s.toLowerCase().includes(lower));
+
+      if (matched.length === 0) {
+        return { content: [{ type: "text" as const, text: `${header}> 🔍 \`${query}\` 에 해당하는 항목이 없습니다.` }] };
+      }
+
+      return { content: [{ type: "text" as const, text: header + matched.join("\n") }] };
     }
   );
 

@@ -13,9 +13,9 @@ describe("MCP 서버 로드 확인", () => {
     await client.connect(clientTransport);
   });
 
-  it("7개 도구가 등록되어 있다", async () => {
+  it("8개 도구가 등록되어 있다", async () => {
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(7);
+    expect(tools).toHaveLength(8);
     const names = tools.map((t) => t.name);
     expect(names).toContain("spec_init");
     expect(names).toContain("spec_todo");
@@ -24,6 +24,7 @@ describe("MCP 서버 로드 확인", () => {
     expect(names).toContain("spec_status");
     expect(names).toContain("spec_handoff");
     expect(names).toContain("spec_archive");
+    expect(names).toContain("spec_search");
   });
 
   // ── 기존 도구 ──────────────────────────────────────────────────────────────
@@ -77,6 +78,26 @@ describe("MCP 서버 로드 확인", () => {
     const result = await client.callTool({
       name: "spec_work",
       arguments: { feature: "__nonexistent__", todo: "T-01" },
+    });
+    const text = (result.content[0] as { text: string }).text;
+    expect(text.length).toBeGreaterThan(0);
+  });
+
+  // ── spec_search ──────────────────────────────────────────────────────────────
+
+  it("spec_search — search.md 없으면 오류 메시지를 반환한다", async () => {
+    const result = await client.callTool({
+      name: "spec_search",
+      arguments: { feature: "__nonexistent__" },
+    });
+    const text = (result.content[0] as { text: string }).text;
+    expect(text).toContain("없습니다");
+  });
+
+  it("spec_search — query 지정 시 매칭 없으면 안내 메시지를 반환한다", async () => {
+    const result = await client.callTool({
+      name: "spec_search",
+      arguments: { feature: "__nonexistent__", query: "SomeSymbol" },
     });
     const text = (result.content[0] as { text: string }).text;
     expect(text.length).toBeGreaterThan(0);
