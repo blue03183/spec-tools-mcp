@@ -24,7 +24,7 @@ Spec-Tools-MCP 正是为此而构建的。每个功能在 `ai-spec/projects/<fea
 #### 1. 在项目中安装包
 
 ```bash
-npm install spec-tools-mcp
+npm install spec-tools-mcp --save-dev
 ```
 
 #### 2. 配置 MCP 服务器
@@ -69,20 +69,38 @@ npx spec-tools-mcp init
 
 #### 3. IDE 配置
 
-**VS Code + GitHub Copilot**（`.vscode/mcp.json`）——使用上方选项 B 或 C，或运行 `npx spec-tools-mcp init`
+**Claude Code**
 
-**Claude Code**（`.mcp.json`）：
+ 在项目根目录创建 `.mcp.json` 文件（`npx spec-tools-mcp init` 会自动创建）。刷新 IDE 窗口后，使用 `/mcp`（MCP servers）命令确认 `spec-tools-mcp` 服务器已连接。
 
-```json
-{
-  "mcpServers": {
+**GitHub Copilot**
+
+ 创建 `.vscode/mcp.json` 文件（`npx spec-tools-mcp init` 会自动创建）。
+ 由于 VS Code 的 MCP 服务器在 `VSCode Extension Host` 中运行，而非在终端中，`npx` 和 `node` 命令可能无法被识别。
+ 需要在 `.vscode/mcp.json` 中明确指定 `command` 和 env `PATH`：
+
+ ```
+ {
+  "servers": {
     "spec-tools-mcp": {
-      "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
+      "type": "stdio",
+      "command": "/Users/{用户名}/.nvm/versions/node/v24.11.0/bin/npx",    // 在终端运行 `which npx` 获取此路径
+      "args": [
+        "-y",
+        "spec-tools-mcp"
+      ],
+      "env": {
+        "PATH": "/Users/{用户名}/.nvm/versions/node/v24.11.0/bin:/usr/local/bin:/usr/bin:/bin"  // 在终端运行 `echo $PATH` 获取此路径
+      }
     }
   }
 }
-```
+ ```
+
+ 明确配置 `command` 和 env `PATH` 后，VS Code Extension Host 将能识别 `npx` 命令并正常启动 MCP 服务器。
+ 刷新 IDE 窗口后，前往**扩展** → **MCP 服务器 - 已安装**，右键点击 `spec-tools-mcp`，选择**启动服务器**手动启动。
+
+> **注意：** 如果在 MCP 服务器运行时重新加载 IDE 窗口，需要手动重启服务器（不会自动重启）。
 
 **Claude Desktop**（`claude_desktop_config.json`）：
 
@@ -104,6 +122,8 @@ npx spec-tools-mcp init
 command = "npx"
 args = ["-y", "spec-tools-mcp"]
 ```
+
+如果项目级设置未能正常生效，请通过 `vi ~/.codex/config.toml` 将 MCP 服务器配置添加到全局设置中。
 
 **Cursor**（`.cursor/mcp.json`）：
 

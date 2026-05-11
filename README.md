@@ -24,7 +24,7 @@ Call skills directly from any project via MCP — no file copying required.
 #### 1. Install the package in your project
 
 ```bash
-npm install spec-tools-mcp
+npm install spec-tools-mcp --save-dev
 ```
 
 #### 2. Configure MCP Server
@@ -69,20 +69,38 @@ This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes th
 
 #### 3. IDE Setup
 
-**VS Code + GitHub Copilot** (`.vscode/mcp.json`) — use Option B or Option C above, or run `npx spec-tools-mcp init`
+**Claude Code**
 
-**Claude Code** (`.mcp.json`):
+ Create a `.mcp.json` file at the project root (auto-created by `npx spec-tools-mcp init`). After refreshing the IDE window, verify that the `spec-tools-mcp` server is connected using the `/mcp` (MCP servers) command.
 
-```json
-{
-  "mcpServers": {
+**GitHub Copilot**
+
+ Create a `.vscode/mcp.json` file (auto-created by `npx spec-tools-mcp init`).
+ Since VS Code's MCP server runs inside the `VSCode Extension Host` rather than the terminal, `npx` and `node` commands may not be recognized.
+ You must explicitly specify `command` and env `PATH` in `.vscode/mcp.json`:
+
+ ```
+ {
+  "servers": {
     "spec-tools-mcp": {
-      "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
+      "type": "stdio",
+      "command": "/Users/{username}/.nvm/versions/node/v24.11.0/bin/npx",    // Run `which npx` in terminal to get this path
+      "args": [
+        "-y",
+        "spec-tools-mcp"
+      ],
+      "env": {
+        "PATH": "/Users/{username}/.nvm/versions/node/v24.11.0/bin:/usr/local/bin:/usr/bin:/bin"  // Run `echo $PATH` in terminal to get this path
+      }
     }
   }
 }
-```
+ ```
+
+ With explicit `command` and env `PATH` configured, VS Code Extension Host will recognize the `npx` command and start the MCP server correctly.
+ After refreshing the IDE window, go to **Extensions** → **MCP Servers - Installed**, right-click `spec-tools-mcp`, and select **Start Server** to start it manually.
+
+> **Note:** If you reload the IDE window while the MCP server is running, you must restart the server manually (it does not restart automatically).
 
 **Claude Desktop** (`claude_desktop_config.json`):
 
@@ -104,6 +122,8 @@ This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes th
 command = "npx"
 args = ["-y", "spec-tools-mcp"]
 ```
+
+If project-level settings are not applied correctly, add the MCP server config globally via `vi ~/.codex/config.toml`.
 
 **Cursor** (`.cursor/mcp.json`):
 
@@ -256,7 +276,7 @@ Use when you need to look up file locations or symbols cached in `search.md` wit
 8. **When a feature is complete**, archive it to keep `projects/` clean
    - `spec_archive` moves the folder to `ai-spec/archive/` — blocked if any todo is still incomplete
 
-#### 8. Generated Folder Structure
+#### 9. Generated Folder Structure
 
 ```
 ai-spec
@@ -279,7 +299,7 @@ ai-spec
 
 **Custom templates**: Place `ai-spec/templates/requirement.md` or `ai-spec/templates/todo.md` to use your own template format instead of the built-in defaults.
 
-#### 9. Notes
+#### 10. Notes
 
 - If your project has a `CLAUDE.md` or `copilot-instructions.md` that describes the folder structure, key file paths, and tech stack, the AI can skip broad codebase exploration and focus immediately on relevant files.
 - When context grows too long, AI accuracy can degrade. It is recommended to start a new session for each TODO item. Pass the task number directly (e.g. `spec_work T-02`) to jump straight to that item.

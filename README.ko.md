@@ -24,7 +24,7 @@ MCP를 통해 모든 프로젝트에서 스킬을 직접 호출합니다 — 파
 #### 1. 프로젝트에 패키지 설치
 
 ```bash
-npm install spec-tools-mcp
+npm install spec-tools-mcp --save-dev
 ```
 
 #### 2. MCP 서버 설정
@@ -67,35 +67,40 @@ npx spec-tools-mcp init
 }
 ```
 
-#### 3. IDE 설정
+#### 3. VS Code 에서 설정
 
-**VS Code + GitHub Copilot** (`.vscode/mcp.json`) — 위 옵션 B 또는 C 사용, 또는 `npx spec-tools-mcp init` 실행
+**Claude Code**
 
-**Claude Code** (`.mcp.json`):
+ 프로젝트 루트 경로에 `.mcp.json` 파일을 생성하고 (npx spec-tools-mcp init 시 자동설치됨) IDE 창을 새로고침 한 후 `/mcp` (MCP servers) 명령어로 `spec-tools-mcp` 서버가 연결되었는지 확인하세요.
 
-```json
-{
-  "mcpServers": {
+**GitHub Copilot**
+
+ `.vscode/mcp.json` 파일을 생성합니다. (npx spec-tools-mcp init 시 자동설치됨)
+ vscode 의 mcp 서버 실행은 터미널에서 진행되는게 아닌 `VSCode Extension Host` 에서 실행되기 떄문에 npx 및 node 명령어가 제대로 인식되지 않습니다.
+ 그렇기 떄문에 `.vscode/mcp.json` 파일에 `command` 와 env `PATH` 를 명시적으로 지정해 주어야 합니다.
+
+ ```
+ {
+  "servers": {
     "spec-tools-mcp": {
-      "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
+      "type": "stdio",
+      "command": "/Users/{사용자이름}/.nvm/versions/node/v24.11.0/bin/npx",    // 터미널에서 which npx 명령어로 확인한 경로를 입력해 주세요
+      "args": [
+        "-y",
+        "spec-tools-mcp"
+      ],
+      "env": {
+        "PATH": "/Users/{사용자이름}/.nvm/versions/node/v24.11.0/bin:/usr/local/bin:/usr/bin:/bin"  // 터미널에서 echo $PATH 명령어로 확인한 경로를 입력해 주세요
+      }
     }
   }
 }
-```
+ ```
 
-**Claude Desktop** (`claude_desktop_config.json`):
+위와 같이 `.vscode/mcp.json` 파일에 명시적으로 `command` 와 env `PATH` 를 지정해 주면, VS Code Extension Host에서 npx 명령어를 인식하여 MCP 서버가 정상적으로 실행됩니다.
+IDE 창 새로고침 한 후 `확장` -> `MCP 서버 - 설치됨` 에서 `spec-tools-mcp` 서버에 마우스 우클릭 -> `서버 시작` 을 선택하여 서버를 수동으로 실행해 주세요.
 
-```json
-{
-  "mcpServers": {
-    "spec-tools-mcp": {
-      "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
-    }
-  }
-}
-```
+주의! vscode 의 mcp 서버 실행 후 IDE 를 새로고침 하는경우 서버를 다시 시작해 주어야 합니다. (서버가 자동으로 재시작되지 않음)
 
 **Codex** (`.codex/config.toml`):
 
@@ -105,26 +110,8 @@ command = "npx"
 args = ["-y", "spec-tools-mcp"]
 ```
 
-**Cursor** (`.cursor/mcp.json`):
+프로젝트 설정이 정상적으로 적용되지않는경우 `vi ~/.codex/config.toml` 명령어로 mcp 서버 설정을 전역으로 추가해 주세요.
 
-```json
-{
-  "mcpServers": {
-    "spec-tools-mcp": {
-      "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
-    }
-  }
-}
-```
-
-**JetBrains** (MCP 플러그인):
-
-플러그인 설정 UI에 다음 명령어를 입력하세요:
-
-```
-npx -y spec-tools-mcp
-```
 
 #### 4. 커스텀 스펙 디렉토리 (선택)
 
