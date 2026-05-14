@@ -21,17 +21,11 @@ Spec-Tools-MCP was built specifically for this scenario. Each feature gets its o
 
 Call skills directly from any project via MCP — no file copying required.
 
-#### 1. Install the package in your project
+#### 1. IDE Setup
 
-```bash
-npm install spec-tools-mcp --save-dev
-```
+**Claude Code**
 
-#### 2. Configure MCP Server
-
-**Option A — Install as a Plugin (Claude Code)**
-
-Install the MCP server and skills together as a Claude Code plugin:
+Install the MCP server and Skills together as a plugin:
 
 ```sh
 /plugin marketplace add blue03183/spec-tools-mcp
@@ -40,32 +34,96 @@ Install the MCP server and skills together as a Claude Code plugin:
 
 Restart Claude Code to activate. Verify with `/mcp` or `/skills`.
 
-**Option B — One-click install (VS Code / GitHub Copilot)**
+---
 
-Click the button below to install the MCP server directly into VS Code:
+**VS Code / GitHub Copilot**
 
-[<img src="https://img.shields.io/badge/VS_Code-Install%20MCP%20Server-0098FF?style=flat-square&logo=visualstudiocode" alt="Install in VS Code">](https://vscode.dev/redirect/mcp/install?name=io.github.blue03183%2Fspec-tools-mcp&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22spec-tools-mcp%22%5D%2C%22env%22%3A%7B%7D%7D)
-[<img src="https://img.shields.io/badge/VS_Code_Insiders-Install%20MCP%20Server-24bfa5?style=flat-square&logo=visualstudiocode" alt="Install in VS Code Insiders">](https://insiders.vscode.dev/redirect?url=vscode-insiders%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522io.github.blue03183%252Fspec-tools-mcp%2522%252C%2522config%2522%253A%257B%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522spec-tools-mcp%2522%255D%252C%2522env%2522%253A%257B%257D%257D%257D)
+> To call skills directly in Copilot chat, use the **plugin install** method.
+> Installing only the MCP server adds a prefix (`blu_`) to all tool names and prevents direct skill invocation from the chat panel.
 
-Or install as a plugin (MCP server + Skills bundled):
+**Install as a plugin** (MCP server + Skills bundled):
 
 1. Open the **Command Palette** (`Cmd+Shift+P` / `Ctrl+Shift+P`)
 2. Run **Chat: Install Plugin From Source**
 3. Paste: `https://github.com/blue03183/spec-tools-mcp`
 
----
+<details>
+<summary>Generate .vscode/mcp.json</summary>
 
-**Option C — Auto-configure (recommended)**
-
-Run the following command in your project root:
+Use auto-configure to generate `.vscode/mcp.json`:
 
 ```bash
 npx spec-tools-mcp init
 ```
 
-This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes the correct config file for each one automatically. Already-configured entries are skipped.
+VS Code's MCP server runs inside the `VSCode Extension Host`, not the terminal, so `npx` and `node` may not be recognized.
+Explicitly specify `command` and env `PATH` in `.vscode/mcp.json`:
 
-**Option D — Run with npx (manual)**
+```json
+{
+  "servers": {
+    "spec-tools-mcp": {
+      "type": "stdio",
+      "command": "/Users/{username}/.nvm/versions/node/v24.11.0/bin/npx",
+      "args": ["-y", "spec-tools-mcp"],
+      "env": {
+        "PATH": "/Users/{username}/.nvm/versions/node/v24.11.0/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    }
+  }
+}
+```
+
+> Run `which npx` to get the npx path, and `echo $PATH` to get the PATH value.
+
+After refreshing the IDE window, go to **Extensions** → **MCP Servers - Installed**, right-click `spec-tools-mcp`, and select **Start Server** to start it manually.
+
+> **Note:** If you reload the IDE window, you must restart the server manually (it does not restart automatically).
+
+</details>
+
+<details>
+<summary>MCP server only (one-click, direct skill invocation not available)</summary>
+
+[<img src="https://img.shields.io/badge/VS_Code-Install%20MCP%20Server-0098FF?style=flat-square&logo=visualstudiocode" alt="Install in VS Code">](https://vscode.dev/redirect/mcp/install?name=io.github.blue03183%2Fspec-tools-mcp&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22spec-tools-mcp%22%5D%2C%22env%22%3A%7B%7D%7D)
+[<img src="https://img.shields.io/badge/VS_Code_Insiders-Install%20MCP%20Server-24bfa5?style=flat-square&logo=visualstudiocode" alt="Install in VS Code Insiders">](https://insiders.vscode.dev/redirect?url=vscode-insiders%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522io.github.blue03183%252Fspec-tools-mcp%2522%252C%2522config%2522%253A%257B%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522spec-tools-mcp%2522%255D%252C%2522env%2522%253A%257B%257D%257D%257D)
+
+</details>
+
+---
+
+**Codex CLI**
+
+Install via CLI:
+(If Codex CLI is not installed, install it first: `npm install -g @openai/codex`)
+
+```bash
+codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
+```
+
+Or configure manually (`.codex/config.toml`):
+
+```toml
+[mcp_servers.spec-tools-mcp]
+command = "npx"
+args = ["-y", "spec-tools-mcp"]
+```
+
+> If project settings are not applied, add to global config with `vi ~/.codex/config.toml`.
+
+---
+
+**Cursor / Other IDEs**
+
+Auto-configure from your project root:
+
+```bash
+npx spec-tools-mcp init
+```
+
+Detects Claude Code, Cursor, and VS Code automatically and writes the correct config file for each.
+
+Or add manually to your MCP config file:
 
 ```json
 {
@@ -79,7 +137,16 @@ This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes th
 }
 ```
 
-**Option E — Use local installation path**
+<details>
+<summary>Using a local installation path</summary>
+
+First, install the package:
+
+```bash
+npm install spec-tools-mcp --save-dev
+```
+
+Then reference the local path in your config:
 
 ```json
 {
@@ -93,38 +160,9 @@ This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes th
 }
 ```
 
-#### 3. GitHub Copilot Troubleshooting
+</details>
 
-**GitHub Copilot**
-
- Create a `.vscode/mcp.json` file (auto-created by `npx spec-tools-mcp init`).
- Since VS Code's MCP server runs inside the `VSCode Extension Host` rather than the terminal, `npx` and `node` commands may not be recognized.
- You must explicitly specify `command` and env `PATH` in `.vscode/mcp.json`:
-
- ```
- {
-  "servers": {
-    "spec-tools-mcp": {
-      "type": "stdio",
-      "command": "/Users/{username}/.nvm/versions/node/v24.11.0/bin/npx",    // Run `which npx` in terminal to get this path
-      "args": [
-        "-y",
-        "spec-tools-mcp"
-      ],
-      "env": {
-        "PATH": "/Users/{username}/.nvm/versions/node/v24.11.0/bin:/usr/local/bin:/usr/bin:/bin"  // Run `echo $PATH` in terminal to get this path
-      }
-    }
-  }
-}
- ```
-
- With explicit `command` and env `PATH` configured, VS Code Extension Host will recognize the `npx` command and start the MCP server correctly.
- After refreshing the IDE window, go to **Extensions** → **MCP Servers - Installed**, right-click `spec-tools-mcp`, and select **Start Server** to start it manually.
-
-> **Note:** If you reload the IDE window while the MCP server is running, you must restart the server manually (it does not restart automatically).
-
-#### 4. Custom spec directory (optional)
+#### 2. Custom spec directory (optional)
 
 By default, spec files are stored under `ai-spec/` at the project root. To use a different path, set the `SPEC_ROOT_DIR` environment variable:
 
@@ -140,7 +178,7 @@ By default, spec files are stored under `ai-spec/` at the project root. To use a
 }
 ```
 
-#### 5. Restart & Verify
+#### 3. Restart & Verify
 
 After adding the MCP configuration, **restart your AI agent** (reload the IDE window or restart the chat session) so the new server is picked up.
 
@@ -158,7 +196,7 @@ get_rules
 
 If the server is connected, the AI will list the four tools (`spec_init`, `spec_todo`, `spec_work`, `get_rules`) or return the development rules document.
 
-#### 6. How to Use Skills
+#### 4. How to Use Skills
 
 Once the MCP server is connected, request skills in natural language from the AI chat.
 
@@ -182,7 +220,7 @@ Analyze requirements with spec_todo
 Work on T-01 with spec_work
 ```
 
-#### 7. Available Tools
+#### 5. Available Tools
 
 | Tool | Description | Example |
 |------|-------------|---------|
@@ -221,7 +259,7 @@ Call once a feature is fully complete. Moves the feature folder to `ai-spec/arch
 **`spec_search`**  
 Use when you need to look up file locations or symbols cached in `_codebase/` without opening the files manually. Pass an optional `query` keyword to return only the matching sections. Useful for quickly finding where a class or function was last recorded.
 
-#### 8. Workflow
+#### 6. Workflow
 
 1. **Initialize** the project with `spec_init`
    - Creates an `ai-spec/projects/{project-name}/` folder with `requirement.md` template and optional `docs/` folder
@@ -256,7 +294,7 @@ Use when you need to look up file locations or symbols cached in `_codebase/` wi
 8. **When a feature is complete**, archive it to keep `projects/` clean
    - `spec_archive` moves the folder to `ai-spec/archive/` — blocked if any todo is still incomplete
 
-#### 9. Generated Folder Structure
+#### 7. Generated Folder Structure
 
 ```
 ai-spec
@@ -284,7 +322,7 @@ ai-spec
 
 **Custom templates**: Place `ai-spec/templates/requirement.md` or `ai-spec/templates/todo.md` to use your own template format instead of the built-in defaults.
 
-#### 10. Notes
+#### 8. Notes
 
 - `ai-spec/_codebase/` serves as the persistent codebase knowledge base. Once populated by `spec_init`, subsequent features and tasks reference it instead of re-scanning the workspace — significantly reducing token usage as the project grows.
 - When context grows too long, AI accuracy can degrade. It is recommended to start a new session for each TODO item. Pass the task number directly (e.g. `spec_work T-02`) to jump straight to that item.
