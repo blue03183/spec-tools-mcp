@@ -141,7 +141,15 @@ npx spec-tools-mcp init
 }
 ```
 
-**Codex**（`.codex/config.toml`）：
+**Codex**
+
+通过 CLI 安装：
+
+```bash
+codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
+```
+
+或手动配置（`.codex/config.toml`）：
 
 ```toml
 [mcp_servers.spec-tools-mcp]

@@ -128,7 +128,15 @@ IDE 창 새로고침 한 후 `확장` -> `MCP 서버 - 설치됨` 에서 `spec-t
 
 주의! vscode 의 mcp 서버 실행 후 IDE 를 새로고침 하는경우 서버를 다시 시작해 주어야 합니다. (서버가 자동으로 재시작되지 않음)
 
-**Codex** (`.codex/config.toml`):
+**Codex**
+
+CLI로 설치:
+
+```bash
+codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
+```
+
+또는 수동 설정 (`.codex/config.toml`):
 
 ```toml
 [mcp_servers.spec-tools-mcp]

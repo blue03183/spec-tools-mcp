@@ -141,7 +141,15 @@ npx spec-tools-mcp init
 }
 ```
 
-**Codex**（`.codex/config.toml`）：
+**Codex**
+
+CLI でインストール：
+
+```bash
+codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
+```
+
+または手動設定（`.codex/config.toml`）：
 
 ```toml
 [mcp_servers.spec-tools-mcp]

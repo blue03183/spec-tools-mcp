@@ -141,7 +141,15 @@ This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes th
 }
 ```
 
-**Codex** (`.codex/config.toml`):
+**Codex**
+
+Install via CLI:
+
+```bash
+codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
+```
+
+Or configure manually (`.codex/config.toml`):
 
 ```toml
 [mcp_servers.spec-tools-mcp]
