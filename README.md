@@ -40,7 +40,7 @@ Install the MCP server and skills together as a Claude Code plugin:
 
 Restart Claude Code to activate. Verify with `/mcp` or `/skills`.
 
-**Option A — One-click install (VS Code / GitHub Copilot)**
+**Option B — One-click install (VS Code / GitHub Copilot)**
 
 Click the button below to install the MCP server directly into VS Code:
 
@@ -55,7 +55,7 @@ Or install as a plugin (MCP server + Skills bundled):
 
 ---
 
-**Option B — Auto-configure (recommended)**
+**Option C — Auto-configure (recommended)**
 
 Run the following command in your project root:
 
@@ -65,7 +65,7 @@ npx spec-tools-mcp init
 
 This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes the correct config file for each one automatically. Already-configured entries are skipped.
 
-**Option C — Run with npx (manual)**
+**Option D — Run with npx (manual)**
 
 ```json
 {
@@ -79,7 +79,7 @@ This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes th
 }
 ```
 
-**Option D — Use local installation path**
+**Option E — Use local installation path**
 
 ```json
 {

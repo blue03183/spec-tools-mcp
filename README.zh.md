@@ -29,7 +29,18 @@ npm install spec-tools-mcp --save-dev
 
 #### 2. 配置 MCP 服务器
 
-**选项 A — 一键安装（VS Code / GitHub Copilot）**
+**选项 A — 作为插件安装（Claude Code）**
+
+将 MCP 服务器和 Skills 一起作为 Claude Code 插件安装：
+
+```sh
+/plugin marketplace add blue03183/spec-tools-mcp
+/plugin install spec-tools-mcp@spec-tools-mcp-marketplace
+```
+
+重启 Claude Code 后生效。使用 `/mcp` 或 `/skills` 确认安装。
+
+**选项 B — 一键安装（VS Code / GitHub Copilot）**
 
 点击以下按钮，直接将 MCP 服务器安装到 VS Code：
 
@@ -44,7 +55,7 @@ npm install spec-tools-mcp --save-dev
 
 ---
 
-**选项 B — 自动配置（推荐）**
+**选项 C — 自动配置（推荐）**
 
 在项目根目录运行以下命令：
 
@@ -54,7 +65,7 @@ npx spec-tools-mcp init
 
 自动检测当前项目使用的 IDE（Claude Code、Cursor、VS Code），并为每个 IDE 生成对应的配置文件。已配置的条目会自动跳过。
 
-**选项 C — 使用 npx 运行（手动）**
+**选项 D — 使用 npx 运行（手动）**
 
 ```json
 {
@@ -68,7 +79,7 @@ npx spec-tools-mcp init
 }
 ```
 
-**选项 D — 使用本地安装路径**
+**选项 E — 使用本地安装路径**
 
 ```json
 {

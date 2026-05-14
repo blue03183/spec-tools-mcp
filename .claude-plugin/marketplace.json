@@ -4,7 +4,7 @@
   "description": "Spec-driven toolkit for AI agents — skills, rules & prompts via MCP",
   "repository": "https://github.com/blue03183/spec-tools-mcp",
   "owner": {
-    "name": "blue03183",
+    "name": "sang-kwon seo",
     "email": "blue03183@gmail.com"
   },
   "plugins": [

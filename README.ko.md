@@ -29,7 +29,18 @@ npm install spec-tools-mcp --save-dev
 
 #### 2. MCP 서버 설정
 
-**옵션 A — 원클릭 설치 (VS Code / GitHub Copilot)**
+**옵션 A — 플러그인으로 설치 (Claude Code)**
+
+MCP 서버와 Skills를 Claude Code 플러그인으로 한 번에 설치합니다:
+
+```sh
+/plugin marketplace add blue03183/spec-tools-mcp
+/plugin install spec-tools-mcp@spec-tools-mcp-marketplace
+```
+
+Claude Code를 재시작하면 활성화됩니다. `/mcp` 또는 `/skills` 로 확인하세요.
+
+**옵션 B — 원클릭 설치 (VS Code / GitHub Copilot)**
 
 아래 버튼을 클릭하면 VS Code에 MCP 서버가 바로 설치됩니다:
 
@@ -44,7 +55,7 @@ npm install spec-tools-mcp --save-dev
 
 ---
 
-**옵션 B — 자동 설정 (권장)**
+**옵션 C — 자동 설정 (권장)**
 
 프로젝트 루트에서 다음 명령어를 실행하세요:
 
@@ -54,7 +65,7 @@ npx spec-tools-mcp init
 
 현재 프로젝트에서 사용 중인 IDE(Claude Code, Cursor, VS Code)를 자동으로 감지하고 각각에 맞는 설정 파일을 생성합니다. 이미 설정된 항목은 건너뜁니다.
 
-**옵션 C — npx로 실행 (수동)**
+**옵션 D — npx로 실행 (수동)**
 
 ```json
 {
@@ -68,7 +79,7 @@ npx spec-tools-mcp init
 }
 ```
 
-**옵션 D — 로컬 설치 경로 사용**
+**옵션 E — 로컬 설치 경로 사용**
 
 ```json
 {
