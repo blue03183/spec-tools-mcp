@@ -8,7 +8,7 @@ argument-hint: "feature 폴더명 또는 todo 항목 번호 (예: dashboard, T-0
 
 ## 역할
 
-계획 기반 구현 엔지니어로서 승인된 plan.md에 따라 체계적으로 코드를 작성한다. 즉흥적인 구현 대신 설계 목표를 달성하는 최소한의 변경을 추구하며, 모든 진행 상황을 search.md와 update.md에 정확히 기록하여 세션 재개 시 컨텍스트 손실이 없도록 한다.
+계획 기반 구현 엔지니어로서 승인된 plan.md에 따라 체계적으로 코드를 작성한다. 즉흥적인 구현 대신 설계 목표를 달성하는 최소한의 변경을 추구하며, 모든 진행 상황을 update.md에 기록하고 코드베이스 변경 사항을 _codebase/ 에 반영하여 세션 재개 시 컨텍스트 손실이 없도록 한다.
 
 ## 개요
 
@@ -88,19 +88,19 @@ plan 작성해줘
 | plan.md 있고 Approval Status = `[수정]` | Step 3 으로 이동 (plan.md 재작성) |
 | plan.md 있고 Approval Status = `[승인]` | Step 5 로 이동 (구현) |
 
+todo.md 상태가 `[ ] IN PROGRESS` 인 경우 → Step 5 로 이동 (작업 재개)
 update.md 가 존재하고 미완료 항목이 있는 경우 → Step 5 로 이동 (작업 재개)
 
 ---
 
 ### Step 3 — plan.md 작성
 
-`requirement.md`, `search.md`, `todo.md` 를 읽어 해당 todo 항목의 plan.md 를 작성한다.
+`requirement.md`, `todo.md` 를 읽어 해당 todo 항목의 plan.md 를 작성한다.
 
-**search.md 우선 확인 규칙 (필수)**
-1. `PROJECT_SPEC_DIR/search.md` 를 **반드시 먼저** 읽어 필요한 코드 위치·스키마 정보를 확인한다.
-2. search.md 에 해당 todo 구현에 충분한 정보가 있으면 → 워크스페이스 탐색을 하지 않는다.
-3. search.md 에 정보가 없거나 부족한 경우에만 최소 범위로 워크스페이스를 탐색한다.
-4. 탐색으로 새로 파악한 코드 위치·스키마는 즉시 `search.md` 에 추가 기록한다.
+**코드 위치 확인 우선순위 (필수 — rules의 `Step 3 — Workspace Discovery` 참조)**
+1. `ai-spec/_codebase/index.md` → 관련 `modules/<domain>.md` 순서로 읽는다.
+2. 1단계로 충분한 경우 워크스페이스를 직접 탐색하지 않는다.
+3. 직접 탐색이 필요한 경우 최소 범위로 진행하고, 새로 발견한 정보는 즉시 `ai-spec/_codebase/modules/<domain>.md` 에 반영한다.
 
 **plan.md 경로**
 
@@ -176,7 +176,12 @@ plan.md 작성 또는 수정 완료 후 **채팅에 plan.md 전체 내용을 출
 
 ### Step 5 — 구현
 
-plan.md 와 `PROJECT_SPEC_DIR/search.md` 를 참조하여 구현을 진행한다.
+plan.md 와 `ai-spec/_codebase/modules/<domain>.md` 를 참조하여 구현을 진행한다.
+
+**구현 시작 — 첫 번째 액션 (필수)**
+
+구현 코드 작성 전, `todo.md` 의 해당 항목 상태를 `[ ] IN PROGRESS` 로 변경한다.
+이 변경이 완료되어야 세션이 중단되어도 재진입 시 해당 작업을 식별하고 재개할 수 있다.
 
 **구현 시작 전 update.md 확인**
 
@@ -194,7 +199,7 @@ plan.md 와 `PROJECT_SPEC_DIR/search.md` 를 참조하여 구현을 진행한다
 
 **구현 진행 규칙**
 - 각 작업 단위가 완료될 때마다 update.md 의 해당 항목에 체크 표시(`[x]`)
-- 구현 중 추가로 파악된 코드 위치·스키마는 즉시 `PROJECT_SPEC_DIR/search.md` 에 추가한다 (누락 금지)
+- 구현 중 추가로 파악된 코드 위치·스키마는 즉시 `ai-spec/_codebase/modules/<domain>.md` 에 반영한다 (누락 금지)
 - 작업이 중단되어도 update.md 를 보고 재개 가능하도록 충분히 기록
 
 모든 구현 완료 시 Step 6 으로 이동한다.
@@ -225,11 +230,13 @@ plan.md 와 `PROJECT_SPEC_DIR/search.md` 를 참조하여 구현을 진행한다
 (실행 방법, 확인할 화면/동작 등)
 ```
 
-`todo.md` 에서 해당 항목의 상태를 `[x] 완료` 로 변경한다.
+`todo.md` 에서 해당 항목의 상태를 `[ ] IN PROGRESS` → `[x] 완료` 로 변경한다.
 
-**search.md 업데이트 (필수)**
-구현으로 인해 변경된 파일 구조·코드 위치·스키마·의존성을 `PROJECT_SPEC_DIR/search.md` 에 반드시 반영한다.
-다음 todo 작업 시 search.md 만 읽어도 현재 프로젝트 상태를 파악할 수 있어야 한다.
+**_codebase/ 업데이트 (필수)**
+1. 위 "변경 파일 목록" 기준으로 `ai-spec/_codebase/index.md` 모듈 맵을 참조하여 영향받은 모듈을 파악한다.
+2. 해당 `ai-spec/_codebase/modules/<domain>.md` 에 변경된 심볼·API·패턴을 반영한다.
+3. 신규 파일·디렉토리가 생긴 경우 `index.md` 모듈 맵과 디렉토리 구조도 갱신한다.
+4. `ai-spec/_codebase/last-synced.md` 를 갱신한다. (일시, `git rev-parse HEAD`, 트리거: `spec-work T-NN`, 업데이트 모듈 목록)
 
 ---
 
@@ -274,7 +281,8 @@ todo.md 의 모든 항목이 완료되었습니다.
 - `todo.md` 가 없으면 구현을 시작하지 않는다.
 - plan.md Approval Status 가 `[승인]` 이 아니면 코드를 작성하지 않는다.
 - plan.md 전체 내용은 채팅에 출력하지 않는다. 파일 경로만 안내한다.
-- **plan.md 작성 전 `search.md` 를 반드시 먼저 읽는다. search.md 에 충분한 정보가 있으면 워크스페이스를 직접 탐색하지 않는다.**
-- **구현 완료 후 변경된 파일 구조·코드 위치·스키마를 `search.md` 에 반드시 업데이트한다. (다음 task 의 유일한 참조 소스)**
+- **plan.md 작성 전 탐색 우선순위: `_codebase/modules/` → 워크스페이스 직접 탐색 순서를 따른다.**
+- **구현 완료 후 변경된 파일 구조·코드 위치·스키마를 `_codebase/modules/` 에 반드시 업데이트한다.**
+- 구현 시작 시 todo.md 상태를 `[ ] IN PROGRESS` 로 변경하는 것이 **첫 번째 액션**이다. 이후 세션 중단 시 재진입 기준이 된다.
 - update.md 는 세션이 중단되어도 재개 가능한 수준으로 상세히 기록한다.
 - E2E 테스트 항목(`T-NNE`)은 대응하는 구현 항목(`T-NN`) 완료 후에 진행한다.

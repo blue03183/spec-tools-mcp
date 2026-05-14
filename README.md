@@ -8,12 +8,12 @@ AI agents tend to lose context as conversations grow long. Spec-Tools-MCP solves
 
 ## Background
 
-Most spec-based development MCPs store their working files (`plan.md`, `search.md`, `todo.md`, etc.) at a fixed location in the project root. This works fine for a single developer working on one feature at a time, but breaks down quickly when:
+Most spec-based development MCPs store their working files (`plan.md`, `todo.md`, etc.) at a fixed location in the project root. This works fine for a single developer working on one feature at a time, but breaks down quickly when:
 
 - **Multiple developers** are working on different features in the same repository simultaneously
 - **Multiple sub-projects** are in flight at once and you need to switch between them or hand off work to a teammate
 
-Because the spec files live at the root level, everything collides — one developer's `todo.md` overwrites another's, `search.md` mixes findings from unrelated features, and it becomes impossible to tell which plan belongs to which work stream.
+Because the spec files live at the root level, everything collides — one developer's `todo.md` overwrites another's, and it becomes impossible to tell which plan belongs to which work stream.
 
 Spec-Tools-MCP was built specifically for this scenario. Each feature gets its own isolated folder under `ai-spec/projects/<feature>/`, so multiple developers or sub-projects can progress independently in the same repository without interfering with each other. Work can be handed off or resumed by any team member simply by pointing to the right feature folder.
 
@@ -29,7 +29,33 @@ npm install spec-tools-mcp --save-dev
 
 #### 2. Configure MCP Server
 
-**Option A — Auto-configure (recommended)**
+**Option A — Install as a Plugin (Claude Code)**
+
+Install the MCP server and skills together as a Claude Code plugin:
+
+```sh
+/plugin marketplace add blue03183/spec-tools-mcp
+/plugin install spec-tools-mcp@spec-tools-mcp-marketplace
+```
+
+Restart Claude Code to activate. Verify with `/mcp` or `/skills`.
+
+**Option A — One-click install (VS Code / GitHub Copilot)**
+
+Click the button below to install the MCP server directly into VS Code:
+
+[<img src="https://img.shields.io/badge/VS_Code-Install%20MCP%20Server-0098FF?style=flat-square&logo=visualstudiocode" alt="Install in VS Code">](https://vscode.dev/redirect/mcp/install?name=io.github.blue03183%2Fspec-tools-mcp&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22spec-tools-mcp%22%5D%2C%22env%22%3A%7B%7D%7D)
+[<img src="https://img.shields.io/badge/VS_Code_Insiders-Install%20MCP%20Server-24bfa5?style=flat-square&logo=visualstudiocode" alt="Install in VS Code Insiders">](https://insiders.vscode.dev/redirect?url=vscode-insiders%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522io.github.blue03183%252Fspec-tools-mcp%2522%252C%2522config%2522%253A%257B%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522spec-tools-mcp%2522%255D%252C%2522env%2522%253A%257B%257D%257D%257D)
+
+Or install as a plugin (MCP server + Skills bundled):
+
+1. Open the **Command Palette** (`Cmd+Shift+P` / `Ctrl+Shift+P`)
+2. Run **Chat: Install Plugin From Source**
+3. Paste: `https://github.com/blue03183/spec-tools-mcp`
+
+---
+
+**Option B — Auto-configure (recommended)**
 
 Run the following command in your project root:
 
@@ -39,7 +65,7 @@ npx spec-tools-mcp init
 
 This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes the correct config file for each one automatically. Already-configured entries are skipped.
 
-**Option B — Run with npx (manual)**
+**Option C — Run with npx (manual)**
 
 ```json
 {
@@ -53,7 +79,7 @@ This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes th
 }
 ```
 
-**Option C — Use local installation path**
+**Option D — Use local installation path**
 
 ```json
 {
@@ -215,18 +241,18 @@ Work on T-01 with spec_work
 | `spec_status` | Show todo progress and pending approvals across all features | `Show current spec status` |
 | `spec_handoff` | Generate a handoff document so another developer or session can resume immediately | `Create handoff doc for dashboard` |
 | `spec_archive` | Move a completed feature from `projects/` to `archive/` | `Archive the dashboard feature` |
-| `spec_search` | Return code locations and symbols from `search.md`; filter by keyword if `query` is provided | `Search for OrderService in dashboard` |
+| `spec_search` | Return code locations and symbols from `_codebase/`; filter by keyword if `query` is provided | `Search for OrderService in codebase` |
 
 **Tool roles and expected effects**
 
 **`spec_init`**  
-Call when starting a new feature. Creates an isolated workspace under `ai-spec/projects/<feature>/` so multiple features or developers can work in the same repository without file conflicts.
+Call when starting a new feature. Creates an isolated workspace under `ai-spec/projects/<feature>/` so multiple features or developers can work in the same repository without file conflicts. Also creates or incrementally updates the project-wide codebase wiki at `ai-spec/_codebase/` — on first run it analyzes the full codebase; on subsequent runs it re-analyzes only the files that changed since the last sync.
 
 **`spec_todo`**  
 Run after planning documents are ready. Analyzes files in `docs/`, writes `requirement.md`, and generates self-contained task items in `todo.md` — acting as a human review checkpoint before any implementation begins.
 
 **`spec_work`**  
-Use when starting implementation or resuming a prior session. Enforces a plan → approval → code gate: writes `plan.md` first, blocks implementation until a human approves, then records each step in `update.md` so work resumes from exactly where it left off. If any file paths recorded in `search.md` no longer exist, a warning is shown automatically.
+Use when starting implementation or resuming a prior session. Enforces a plan → approval → code gate: writes `plan.md` first, blocks implementation until a human approves. When implementation starts, the agent immediately marks the todo item as `[ ] IN PROGRESS` — so even if the session is cut off mid-task (e.g. token limit), the next session can identify and resume the in-progress task. Each step is recorded in `update.md` for fine-grained resumption. Code locations are read from `_codebase/` rather than re-scanning the workspace, and any new findings are written back to `_codebase/` immediately.
 
 **`get_rules`**  
 Call when the AI needs to recall the full development protocol. Returns the entire `spec-development-rules.md` to ensure the AI follows the correct spec-driven workflow.
@@ -241,12 +267,13 @@ Use when handing off work to a teammate or pausing a feature for an extended per
 Call once a feature is fully complete. Moves the feature folder to `ai-spec/archive/`, keeping `projects/` clean and limited to active work. Blocked if any todo item is still incomplete.
 
 **`spec_search`**  
-Use when you need to look up file locations or symbols cached in `search.md` without opening the file manually. Pass an optional `query` keyword to return only the matching sections. Useful for quickly finding where a class or function was last recorded.
+Use when you need to look up file locations or symbols cached in `_codebase/` without opening the files manually. Pass an optional `query` keyword to return only the matching sections. Useful for quickly finding where a class or function was last recorded.
 
 #### 8. Workflow
 
 1. **Initialize** the project with `spec_init`
    - Creates an `ai-spec/projects/{project-name}/` folder with `requirement.md` template and optional `docs/` folder
+   - Creates or updates the shared codebase wiki at `ai-spec/_codebase/` (full analysis on first run; incremental update on subsequent runs based on git changes)
 
 2. **Upload planning documents** (optional)
    - Copy PDF, images, or other planning files into `ai-spec/projects/{project-name}/docs/`
@@ -262,11 +289,12 @@ Use when you need to look up file locations or symbols cached in `search.md` wit
    - You review the plan file directly — no need to describe changes in chat; edit `plan.md` and type `revision done` if changes are needed
    - Type `approved` or `proceed` to start implementation
    - The server enforces the approval gate: if `plan.md` is still `[pending]`, implementation is blocked at the MCP level
+   - As the very first action when implementation starts, the agent marks the todo item `[ ] IN PROGRESS` — if the session is interrupted (e.g. token limit), the next session can detect and resume the in-progress task
    - Progress is recorded in `update.md` as each step completes
 
 5. **Resume anytime** by starting a new session and calling `spec_work` again
-   - AI reads `update.md` to find where it left off and continues from there
-   - `search.md` caches discovered code locations so the AI doesn't re-scan the codebase on each session
+   - AI checks `todo.md` for any `IN PROGRESS` item first and jumps directly to that task, then resumes from the first incomplete item in `update.md`
+   - `_codebase/` provides accumulated code location and pattern knowledge so the AI doesn't re-scan the codebase from scratch on each session or feature
 
 6. Repeat steps 3–4 for each subsequent task
 
@@ -280,6 +308,12 @@ Use when you need to look up file locations or symbols cached in `search.md` wit
 
 ```
 ai-spec
+├─ _codebase/                      # project-wide codebase wiki (shared across all features)
+│   ├─ index.md                    # full directory map, tech stack, module-path mapping table
+│   ├─ last-synced.md              # last analysis timestamp (git hash + trigger)
+│   ├─ modules/
+│   │   └─ <domain>.md             # per-domain: key files, core APIs, patterns, dependencies
+│   └─ conventions.md              # shared conventions, naming rules, architecture patterns
 ├─ templates/                      # (optional) custom templates
 │   ├─ requirement.md              # custom requirement template
 │   └─ todo.md                     # custom todo template
@@ -287,7 +321,6 @@ ai-spec
     └─ <feature>                   # per-feature project folder
         ├─ requirement.md          # requirements document (Single Source of Truth)
         ├─ design.md               # architecture design document (created for complex features)
-        ├─ search.md               # cumulative record of code locations and schemas discovered by AI
         ├─ todo.md                 # task list generated by AI
         ├─ docs/                   # original planning files (PDF, images, etc.)
         └─ <T-number>-<summary>/   # per-task folder
@@ -295,13 +328,13 @@ ai-spec
             └─ update.md           # implementation progress log + review checklist
 ```
 
-**`search.md` role**: The AI records file locations, schemas, and patterns it discovers here so it doesn't re-scan the codebase from scratch each session. The longer a project runs, the less redundant exploration is needed.
+**`_codebase/` role**: The AI records file locations, schemas, and patterns it discovers here — shared across all features. Unlike a per-feature cache, `_codebase/` accumulates knowledge over time: each new feature and each completed task adds to it. The longer a project runs, the less redundant exploration is needed.
 
 **Custom templates**: Place `ai-spec/templates/requirement.md` or `ai-spec/templates/todo.md` to use your own template format instead of the built-in defaults.
 
 #### 10. Notes
 
-- If your project has a `CLAUDE.md` or `copilot-instructions.md` that describes the folder structure, key file paths, and tech stack, the AI can skip broad codebase exploration and focus immediately on relevant files.
+- `ai-spec/_codebase/` serves as the persistent codebase knowledge base. Once populated by `spec_init`, subsequent features and tasks reference it instead of re-scanning the workspace — significantly reducing token usage as the project grows.
 - When context grows too long, AI accuracy can degrade. It is recommended to start a new session for each TODO item. Pass the task number directly (e.g. `spec_work T-02`) to jump straight to that item.
 
 ---

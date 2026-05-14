@@ -26,6 +26,7 @@
     "multi-project"
   ],
   "license": "MIT",
+  "mcpName": "io.github.blue03183/spec-tools-mcp",
   "repository": {
     "type": "git",
     "url": "https://github.com/blue03183/spec-tools-mcp.git"

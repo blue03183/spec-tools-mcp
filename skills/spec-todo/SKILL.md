@@ -236,49 +236,22 @@ requirement.md 가 아직 작성되지 않았습니다.
 
 ---
 
-### B-2 — 워크스페이스 탐색 (search.md 작성)
+### B-2 — 워크스페이스 탐색 및 _codebase/ 반영
 
 요구사항 구현에 필요한 코드 위치와 스키마를 탐색한다.
-탐색 결과를 `ai-spec/projects/<feature>/search.md` 에 기록한다.
 
-**탐색 범위**
-- 요구사항과 관련된 기존 파일·컴포넌트·서비스 위치
-- 참고할 수 있는 유사 구현 패턴
-- 데이터 스키마·타입 정의
+**탐색 우선순위 (rules의 `Step 3 — Workspace Discovery` 참조)**
 
-**탐색 규칙**
-- 해당 feature 에 특정된 실제 코드 위치와 스키마만 기록한다.
-- 가벼운 탐색으로 시작하고 필요한 경우만 심층 탐색한다.
-
-**search.md 템플릿**
-
-포맷 규칙은 rules 의 `search.md 포맷 규칙` 참조.
-
-```markdown
-# <Feature명> 코드 탐색
-
-## 심볼 위치
-| 심볼 | 타입 | 파일 | 라인 |
-|------|------|------|------|
-| `OrderService` | class | `src/services/order.service.ts` | 12 |
-| `getList` | method | `src/services/order.service.ts` | 45 |
-
-## 스키마
-| 필드 | 타입 | 정의 위치 |
-|------|------|-----------|
-| `id` | `string` | `Order` (`src/models/order.ts:5`) |
-
-## 참고 패턴
-| 패턴 | 위치 | 용도 |
-|------|------|------|
-| getList 구현 | `src/services/product.service.ts:30` | T-01 구현 시 참고 |
-```
+1. `ai-spec/_codebase/index.md` 를 읽어 이 feature와 관련된 모듈을 파악한다.
+2. 해당 `_codebase/modules/<domain>.md` 를 읽어 코드 위치·API·패턴을 확인한다.
+3. `_codebase/` 에 없는 정보만 최소 범위로 워크스페이스를 직접 탐색한다.
+4. 새로 발견한 정보는 즉시 `ai-spec/_codebase/modules/<domain>.md` 에 반영하고 `last-synced.md` 를 갱신한다.
 
 ---
 
 ### B-3 — todo.md 작성
 
-`requirement.md` 와 `search.md` 를 기반으로 `todo.md` 를 작성한다.
+`requirement.md` 와 `ai-spec/_codebase/` 를 기반으로 `todo.md` 를 작성한다.
 
 **템플릿 선택 규칙**
 
@@ -333,4 +306,4 @@ todo 목록을 검토한 후 구현을 시작하세요.
 - `docs/` 폴더가 없거나 폴더에 파일이 없으면 문서 분석을 건너뛰고 기존 requirement.md 를 기반으로 작업을 진행한다.
 - 분석 결과는 채팅에 출력하지 않고 requirement.md 파일에 직접 저장한다. 파일 경로만 안내하고 사용자가 파일을 검토·수정하도록 한다.
 - 이미 작성된 requirement.md 의 내용은 사용자 확인 없이 덮어쓰지 않는다.
-- `design.md` 가 존재하는 경우, B-2(워크스페이스 탐색) 전에 읽어 탐색 방향과 search.md 기록에 반영한다.
+- `design.md` 가 존재하는 경우, B-2(워크스페이스 탐색) 전에 읽어 탐색 방향에 반영한다.
