@@ -107,23 +107,6 @@ async function findUpdateMd(featDir: string, todoId: string): Promise<string | n
   }
 }
 
-function extractFilePaths(content: string): string[] {
-  const raw: string[] = [];
-  for (const m of content.matchAll(/`([^`]+\.[a-zA-Z]{1,5}(?::\d+)?)`/g)) {
-    const p = m[1].replace(/:\d+$/, "");
-    if (p.includes("/") && !p.includes(" ")) raw.push(p);
-  }
-  return [...new Set(raw)];
-}
-
-async function findStalePaths(content: string): Promise<string[]> {
-  const stale: string[] = [];
-  for (const p of extractFilePaths(content)) {
-    if (!(await fs.pathExists(path.resolve(process.cwd(), p)))) stale.push(p);
-  }
-  return stale;
-}
-
 // ── 서버 ──────────────────────────────────────────────────────────────────────
 
 export function createServer() {
@@ -165,14 +148,6 @@ export function createServer() {
 
       if (feature) {
         const featDir = path.join(specProjectsPath(), feature);
-        const searchPath = path.join(featDir, "search.md");
-        if (await fs.pathExists(searchPath)) {
-          const stalePaths = await findStalePaths(await fs.readFile(searchPath, "utf-8"));
-          if (stalePaths.length > 0) {
-            prefix += `> ⚠️ **search.md 유효성 경고**: 다음 경로가 존재하지 않습니다. search.md 를 업데이트하세요.\n${stalePaths.map(p => `> - \`${p}\``).join("\n")}\n\n`;
-          }
-        }
-
         if (todo) {
           const todoId = todo.toUpperCase();
           const planPath = await findPlanMd(featDir, todoId);
@@ -353,58 +328,7 @@ export function createServer() {
         }
       }
 
-      // search.md — 심볼 위치 섹션만 추출 (전체 포함 시 컨텍스트 낭비)
-      const searchPath = path.join(featDir, "search.md");
-      if (await fs.pathExists(searchPath)) {
-        const searchContent = await fs.readFile(searchPath, "utf-8");
-        const symbolMatch = searchContent.match(/##\s*심볼 위치\n([\s\S]*?)(?=\n##|$)/);
-        if (symbolMatch) {
-          doc += `## 심볼 위치 (search.md)\n${symbolMatch[1].trim()}\n`;
-        } else {
-          // 구형 포맷: 1500자까지만 포함
-          const truncated = searchContent.length > 1500
-            ? searchContent.slice(0, 1500) + "\n...(이하 생략 — search.md 직접 참조)"
-            : searchContent;
-          doc += `## 코드 위치 (search.md)\n${truncated.trim()}\n`;
-        }
-      }
-
       return { content: [{ type: "text" as const, text: doc }] };
-    }
-  );
-
-  server.tool(
-    "spec_search",
-    "feature의 search.md에서 코드 위치·심볼·스키마를 반환한다. query를 지정하면 해당 키워드가 포함된 섹션만 반환한다.",
-    {
-      feature: z.string().describe("feature 폴더명 (예: dashboard)"),
-      query: z.string().optional().describe("필터링 키워드 (예: OrderService). 생략 시 전체 반환"),
-    },
-    async ({ feature, query }) => {
-      const searchPath = path.join(specProjectsPath(), feature, "search.md");
-
-      if (!(await fs.pathExists(searchPath))) {
-        return { content: [{ type: "text" as const, text: `❌ \`${feature}/search.md\` 가 없습니다. 아직 코드 탐색이 진행되지 않았습니다.` }] };
-      }
-
-      const content = await fs.readFile(searchPath, "utf-8");
-
-      if (!query) {
-        return { content: [{ type: "text" as const, text: content }] };
-      }
-
-      const lower = query.toLowerCase();
-      const headerMatch = content.match(/^# .+/m);
-      const header = headerMatch ? headerMatch[0] + "\n\n" : "";
-
-      const sections = content.split(/(?=^## )/m);
-      const matched = sections.filter(s => s.toLowerCase().includes(lower));
-
-      if (matched.length === 0) {
-        return { content: [{ type: "text" as const, text: `${header}> 🔍 \`${query}\` 에 해당하는 항목이 없습니다.` }] };
-      }
-
-      return { content: [{ type: "text" as const, text: header + matched.join("\n") }] };
     }
   );
 
