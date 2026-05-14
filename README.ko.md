@@ -93,11 +93,7 @@ npx spec-tools-mcp init
 }
 ```
 
-#### 3. VS Code 에서 설정
-
-**Claude Code**
-
- 프로젝트 루트 경로에 `.mcp.json` 파일을 생성하고 (npx spec-tools-mcp init 시 자동설치됨) IDE 창을 새로고침 한 후 `/mcp` (MCP servers) 명령어로 `spec-tools-mcp` 서버가 연결되었는지 확인하세요.
+#### 3. GitHub Copilot 트러블슈팅
 
 **GitHub Copilot**
 
@@ -127,25 +123,6 @@ npx spec-tools-mcp init
 IDE 창 새로고침 한 후 `확장` -> `MCP 서버 - 설치됨` 에서 `spec-tools-mcp` 서버에 마우스 우클릭 -> `서버 시작` 을 선택하여 서버를 수동으로 실행해 주세요.
 
 주의! vscode 의 mcp 서버 실행 후 IDE 를 새로고침 하는경우 서버를 다시 시작해 주어야 합니다. (서버가 자동으로 재시작되지 않음)
-
-**Codex**
-
-CLI로 설치:
-
-```bash
-codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
-```
-
-또는 수동 설정 (`.codex/config.toml`):
-
-```toml
-[mcp_servers.spec-tools-mcp]
-command = "npx"
-args = ["-y", "spec-tools-mcp"]
-```
-
-프로젝트 설정이 정상적으로 적용되지않는경우 `vi ~/.codex/config.toml` 명령어로 mcp 서버 설정을 전역으로 추가해 주세요.
-
 
 #### 4. 커스텀 스펙 디렉토리 (선택)
 

@@ -93,11 +93,7 @@ This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes th
 }
 ```
 
-#### 3. IDE Setup
-
-**Claude Code**
-
- Create a `.mcp.json` file at the project root (auto-created by `npx spec-tools-mcp init`). After refreshing the IDE window, verify that the `spec-tools-mcp` server is connected using the `/mcp` (MCP servers) command.
+#### 3. GitHub Copilot Troubleshooting
 
 **GitHub Copilot**
 
@@ -127,58 +123,6 @@ This detects which IDEs are present (Claude Code, Cursor, VS Code) and writes th
  After refreshing the IDE window, go to **Extensions** → **MCP Servers - Installed**, right-click `spec-tools-mcp`, and select **Start Server** to start it manually.
 
 > **Note:** If you reload the IDE window while the MCP server is running, you must restart the server manually (it does not restart automatically).
-
-**Claude Desktop** (`claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "spec-tools-mcp": {
-      "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
-    }
-  }
-}
-```
-
-**Codex**
-
-Install via CLI:
-
-```bash
-codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
-```
-
-Or configure manually (`.codex/config.toml`):
-
-```toml
-[mcp_servers.spec-tools-mcp]
-command = "npx"
-args = ["-y", "spec-tools-mcp"]
-```
-
-If project-level settings are not applied correctly, add the MCP server config globally via `vi ~/.codex/config.toml`.
-
-**Cursor** (`.cursor/mcp.json`):
-
-```json
-{
-  "mcpServers": {
-    "spec-tools-mcp": {
-      "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
-    }
-  }
-}
-```
-
-**JetBrains** (via MCP Plugin):
-
-Enter the following command in the plugin settings UI:
-
-```
-npx -y spec-tools-mcp
-```
 
 #### 4. Custom spec directory (optional)
 

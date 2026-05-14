@@ -93,11 +93,7 @@ npx spec-tools-mcp init
 }
 ```
 
-#### 3. IDE 配置
-
-**Claude Code**
-
- 在项目根目录创建 `.mcp.json` 文件（`npx spec-tools-mcp init` 会自动创建）。刷新 IDE 窗口后，使用 `/mcp`（MCP servers）命令确认 `spec-tools-mcp` 服务器已连接。
+#### 3. GitHub Copilot 故障排除
 
 **GitHub Copilot**
 
@@ -127,58 +123,6 @@ npx spec-tools-mcp init
  刷新 IDE 窗口后，前往**扩展** → **MCP 服务器 - 已安装**，右键点击 `spec-tools-mcp`，选择**启动服务器**手动启动。
 
 > **注意：** 如果在 MCP 服务器运行时重新加载 IDE 窗口，需要手动重启服务器（不会自动重启）。
-
-**Claude Desktop**（`claude_desktop_config.json`）：
-
-```json
-{
-  "mcpServers": {
-    "spec-tools-mcp": {
-      "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
-    }
-  }
-}
-```
-
-**Codex**
-
-通过 CLI 安装：
-
-```bash
-codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
-```
-
-或手动配置（`.codex/config.toml`）：
-
-```toml
-[mcp_servers.spec-tools-mcp]
-command = "npx"
-args = ["-y", "spec-tools-mcp"]
-```
-
-如果项目级设置未能正常生效，请通过 `vi ~/.codex/config.toml` 将 MCP 服务器配置添加到全局设置中。
-
-**Cursor**（`.cursor/mcp.json`）：
-
-```json
-{
-  "mcpServers": {
-    "spec-tools-mcp": {
-      "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
-    }
-  }
-}
-```
-
-**JetBrains**（通过 MCP 插件）：
-
-在插件设置界面中输入以下命令：
-
-```
-npx -y spec-tools-mcp
-```
 
 #### 4. 自定义规范目录（可选）
 
