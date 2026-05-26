@@ -239,7 +239,7 @@ Work on T-01 with spec_work
 Call when starting a new feature. Creates an isolated workspace under `ai-spec/projects/<feature>/` so multiple features or developers can work in the same repository without file conflicts. Also creates or incrementally updates the project-wide codebase wiki at `ai-spec/_codebase/` — on first run it analyzes the full codebase; on subsequent runs it re-analyzes only the files that changed since the last sync.
 
 **`spec_todo`**  
-Run after planning documents are ready. Analyzes files in `docs/`, writes `requirement.md`, and generates self-contained task items in `todo.md` — acting as a human review checkpoint before any implementation begins.
+Run after planning documents are ready. Analyzes files in `docs/`, writes `requirement.md`, and generates a simple task list in `todo.md` — acting as a human review checkpoint before any implementation begins.
 
 **`spec_work`**  
 Use when starting implementation or resuming a prior session. Enforces a plan → approval → code gate: writes `plan.md` first, blocks implementation until a human approves. When implementation starts, the agent immediately marks the todo item as `[ ] IN PROGRESS` — so even if the session is cut off mid-task (e.g. token limit), the next session can identify and resume the in-progress task. Each step is recorded in `update.md` for fine-grained resumption. Code locations are read from `_codebase/` rather than re-scanning the workspace, and any new findings are written back to `_codebase/` immediately.
@@ -271,7 +271,7 @@ Use when you need to look up file locations or symbols cached in `_codebase/` wi
 3. **Run `spec_todo`** to analyze docs and generate spec files
    - Reads docs and writes `requirement.md` — AI asks you to review before continuing
    - For complex features (new APIs, DB schema changes, component architecture), AI writes a `design.md` draft and asks for review before generating tasks
-   - Generates `todo.md` with self-contained task items (T-01, T-02, …)
+   - Generates a simple task list `todo.md` (T-01, T-02, …)
    - If `requirement.md` already exists, analyzed content is appended below existing requirements
 
 4. **Run `spec_work`** to implement each task
@@ -326,6 +326,47 @@ ai-spec
 
 - `ai-spec/_codebase/` serves as the persistent codebase knowledge base. Once populated by `spec_init`, subsequent features and tasks reference it instead of re-scanning the workspace — significantly reducing token usage as the project grows.
 - When context grows too long, AI accuracy can degrade. It is recommended to start a new session for each TODO item. Pass the task number directly (e.g. `spec_work T-02`) to jump straight to that item.
+
+---
+
+## Updating
+
+When a new version is released, update according to how you installed it.
+
+**Claude Code**
+
+Re-run the install commands to replace the current version with the latest.
+
+```sh
+/plugin marketplace add blue03183/spec-tools-mcp
+/plugin install spec-tools-mcp@spec-tools-mcp-marketplace
+```
+
+**VS Code / GitHub Copilot (plugin)**
+
+Follow the same steps as the initial installation. The existing plugin will be replaced with the latest version.
+
+1. Open the **Command Palette** (`Cmd+Shift+P` / `Ctrl+Shift+P`)
+2. Run **Chat: Install Plugin From Source**
+3. Paste the same URL: `https://github.com/blue03183/spec-tools-mcp`
+
+**npx-based setups (Codex CLI, Cursor, other IDEs)**
+
+Configurations using `npx -y` automatically fetch the latest version each time the server starts. No manual action needed.
+
+If an older cached version persists, refresh it with:
+
+```bash
+npx --yes spec-tools-mcp@latest
+```
+
+**Local install (`npm install --save-dev`)**
+
+```bash
+npm update spec-tools-mcp
+```
+
+After updating, restart your AI agent.
 
 ---
 
