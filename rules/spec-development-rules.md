@@ -349,7 +349,6 @@ todo.md 는 단순 체크리스트가 아닌 **Self-contained 구현 명세**입
 ```markdown
 ## [T-01] getList 메서드 추가
 - 상태: [ ] TODO
-- 대상 파일: `src/services/order.js`
 - 작업내용: product.getList 패턴을 참고해서 order.getList 메서드를 구현합니다.
 ```
 

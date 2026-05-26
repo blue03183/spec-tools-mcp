@@ -274,6 +274,7 @@ ai-spec/projects/<feature>/todo.md
 ```markdown
 ## [T-01] 항목 제목
 - 상태: [ ] TODO
+- 작업내용: 구체적인 구현 방법과 힌트
 ```
 
 각 항목의 상세 설계는 `plan.md` 에서 다룬다. todo 는 작업 식별과 진행 상태 추적 용도로만 사용한다.
