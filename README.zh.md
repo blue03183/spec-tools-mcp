@@ -65,7 +65,7 @@ VS Code 的 MCP 服务器在 `VSCode Extension Host` 中运行，而非终端，
     "spec-tools-mcp": {
       "type": "stdio",
       "command": "/Users/{用户名}/.nvm/versions/node/v24.11.0/bin/npx",
-      "args": ["-y", "spec-tools-mcp"],
+      "args": ["-y", "spec-tools-mcp@latest"],
       "env": {
         "PATH": "/Users/{用户名}/.nvm/versions/node/v24.11.0/bin:/usr/local/bin:/usr/bin:/bin"
       }
@@ -85,8 +85,8 @@ VS Code 的 MCP 服务器在 `VSCode Extension Host` 中运行，而非终端，
 <details>
 <summary>仅安装 MCP 服务器（一键安装，无法直接调用技能）</summary>
 
-[<img src="https://img.shields.io/badge/VS_Code-Install%20MCP%20Server-0098FF?style=flat-square&logo=visualstudiocode" alt="在 VS Code 中安装">](https://vscode.dev/redirect/mcp/install?name=io.github.blue03183%2Fspec-tools-mcp&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22spec-tools-mcp%22%5D%2C%22env%22%3A%7B%7D%7D)
-[<img src="https://img.shields.io/badge/VS_Code_Insiders-Install%20MCP%20Server-24bfa5?style=flat-square&logo=visualstudiocode" alt="在 VS Code Insiders 中安装">](https://insiders.vscode.dev/redirect?url=vscode-insiders%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522io.github.blue03183%252Fspec-tools-mcp%2522%252C%2522config%2522%253A%257B%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522spec-tools-mcp%2522%255D%252C%2522env%2522%253A%257B%257D%257D%257D)
+[<img src="https://img.shields.io/badge/VS_Code-Install%20MCP%20Server-0098FF?style=flat-square&logo=visualstudiocode" alt="在 VS Code 中安装">](https://vscode.dev/redirect/mcp/install?name=io.github.blue03183%2Fspec-tools-mcp&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22spec-tools-mcp%40latest%22%5D%2C%22env%22%3A%7B%7D%7D)
+[<img src="https://img.shields.io/badge/VS_Code_Insiders-Install%20MCP%20Server-24bfa5?style=flat-square&logo=visualstudiocode" alt="在 VS Code Insiders 中安装">](https://insiders.vscode.dev/redirect?url=vscode-insiders%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522io.github.blue03183%252Fspec-tools-mcp%2522%252C%2522config%2522%253A%257B%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522spec-tools-mcp%2540latest%2522%255D%252C%2522env%2522%253A%257B%257D%257D%257D)
 
 </details>
 
@@ -98,7 +98,7 @@ VS Code 的 MCP 服务器在 `VSCode Extension Host` 中运行，而非终端，
 （如果未安装 Codex CLI，请先安装：`npm install -g @openai/codex`）
 
 ```bash
-codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
+codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp@latest
 ```
 
 或手动配置（`.codex/config.toml`）：
@@ -106,7 +106,7 @@ codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
 ```toml
 [mcp_servers.spec-tools-mcp]
 command = "npx"
-args = ["-y", "spec-tools-mcp"]
+args = ["-y", "spec-tools-mcp@latest"]
 ```
 
 > 如果项目配置未生效，请使用 `vi ~/.codex/config.toml` 添加到全局配置。
@@ -131,7 +131,7 @@ npx spec-tools-mcp init
     "spec-tools-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
+      "args": ["-y", "spec-tools-mcp@latest"]
     }
   }
 }
@@ -171,7 +171,7 @@ npm install spec-tools-mcp --save-dev
   "mcpServers": {
     "spec-tools-mcp": {
       "command": "npx",
-      "args": ["-y", "spec-tools-mcp"],
+      "args": ["-y", "spec-tools-mcp@latest"],
       "env": { "SPEC_ROOT_DIR": "my-specs" }
     }
   }

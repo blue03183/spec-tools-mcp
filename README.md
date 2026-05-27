@@ -65,7 +65,7 @@ Explicitly specify `command` and env `PATH` in `.vscode/mcp.json`:
     "spec-tools-mcp": {
       "type": "stdio",
       "command": "/Users/{username}/.nvm/versions/node/v24.11.0/bin/npx",
-      "args": ["-y", "spec-tools-mcp"],
+      "args": ["-y", "spec-tools-mcp@latest"],
       "env": {
         "PATH": "/Users/{username}/.nvm/versions/node/v24.11.0/bin:/usr/local/bin:/usr/bin:/bin"
       }
@@ -85,8 +85,8 @@ After refreshing the IDE window, go to **Extensions** → **MCP Servers - Instal
 <details>
 <summary>MCP server only (one-click, direct skill invocation not available)</summary>
 
-[<img src="https://img.shields.io/badge/VS_Code-Install%20MCP%20Server-0098FF?style=flat-square&logo=visualstudiocode" alt="Install in VS Code">](https://vscode.dev/redirect/mcp/install?name=io.github.blue03183%2Fspec-tools-mcp&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22spec-tools-mcp%22%5D%2C%22env%22%3A%7B%7D%7D)
-[<img src="https://img.shields.io/badge/VS_Code_Insiders-Install%20MCP%20Server-24bfa5?style=flat-square&logo=visualstudiocode" alt="Install in VS Code Insiders">](https://insiders.vscode.dev/redirect?url=vscode-insiders%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522io.github.blue03183%252Fspec-tools-mcp%2522%252C%2522config%2522%253A%257B%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522spec-tools-mcp%2522%255D%252C%2522env%2522%253A%257B%257D%257D%257D)
+[<img src="https://img.shields.io/badge/VS_Code-Install%20MCP%20Server-0098FF?style=flat-square&logo=visualstudiocode" alt="Install in VS Code">](https://vscode.dev/redirect/mcp/install?name=io.github.blue03183%2Fspec-tools-mcp&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22spec-tools-mcp%40latest%22%5D%2C%22env%22%3A%7B%7D%7D)
+[<img src="https://img.shields.io/badge/VS_Code_Insiders-Install%20MCP%20Server-24bfa5?style=flat-square&logo=visualstudiocode" alt="Install in VS Code Insiders">](https://insiders.vscode.dev/redirect?url=vscode-insiders%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522io.github.blue03183%252Fspec-tools-mcp%2522%252C%2522config%2522%253A%257B%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522spec-tools-mcp%2540latest%2522%255D%252C%2522env%2522%253A%257B%257D%257D%257D)
 
 </details>
 
@@ -98,7 +98,7 @@ Install via CLI:
 (If Codex CLI is not installed, install it first: `npm install -g @openai/codex`)
 
 ```bash
-codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp
+codex mcp add spec-tools-mcp -- npx -y spec-tools-mcp@latest
 ```
 
 Or configure manually (`.codex/config.toml`):
@@ -106,7 +106,7 @@ Or configure manually (`.codex/config.toml`):
 ```toml
 [mcp_servers.spec-tools-mcp]
 command = "npx"
-args = ["-y", "spec-tools-mcp"]
+args = ["-y", "spec-tools-mcp@latest"]
 ```
 
 > If project settings are not applied, add to global config with `vi ~/.codex/config.toml`.
@@ -131,7 +131,7 @@ Or add manually to your MCP config file:
     "spec-tools-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "spec-tools-mcp"]
+      "args": ["-y", "spec-tools-mcp@latest"]
     }
   }
 }
@@ -171,7 +171,7 @@ By default, spec files are stored under `ai-spec/` at the project root. To use a
   "mcpServers": {
     "spec-tools-mcp": {
       "command": "npx",
-      "args": ["-y", "spec-tools-mcp"],
+      "args": ["-y", "spec-tools-mcp@latest"],
       "env": { "SPEC_ROOT_DIR": "my-specs" }
     }
   }

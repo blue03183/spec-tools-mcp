@@ -7,7 +7,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "spec-tools-mcp"
+        "spec-tools-mcp@latest"
       ]
     }
   }
