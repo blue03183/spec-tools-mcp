@@ -1,7 +1,6 @@
 node_modules
 .npmrc
-ai-spec/*
-.claude/*
+ai-spec
 .mcp.json
 mcp-server/index.js
 mcp-server/index.d.ts
@@ -10,3 +9,7 @@ mcp-server/*.js.map
 analysis-comparison.md
 test
 spec-update.md
+AGENTS.md
+.claude
+.agents
+.codex
