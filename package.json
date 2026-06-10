@@ -1,7 +1,7 @@
 {
   "name": "spec-tools-mcp",
   "version": "1.3.0",
-  "description": "Spec-driven toolkit for AI agents — skills, rules & prompts via MCP",
+  "description": "MCP toolkit that gives AI agents a structured spec-driven development workflow",
   "type": "module",
   "main": "mcp-server/index.js",
   "files": [
@@ -13,17 +13,17 @@
   ],
   "keywords": [
     "mcp",
+    "mcp-server",
     "model-context-protocol",
     "ai",
     "llm",
     "spec-driven",
     "agent",
-    "copilot",
-    "github-copilot",
     "claude",
     "claude-code",
+    "cursor",
     "workflow",
-    "multi-project"
+    "task-management"
   ],
   "license": "MIT",
   "mcpName": "io.github.blue03183/spec-tools-mcp",
