@@ -248,13 +248,13 @@ Use when starting implementation or resuming a prior session. Enforces a plan �
 Call when the AI needs to recall the full development protocol. Returns the entire `spec-development-rules.md` to ensure the AI follows the correct spec-driven workflow.
 
 **`spec_status`**  
-Use when multiple features are in flight and you need a project-wide view. Shows todo completion rates and all pending plans at a glance, so no approval requests fall through the cracks.
+Use when multiple features are in flight and you need a project-wide view. Shows todo completion rates with a clear distinction between in-progress (`IN PROGRESS`) and not-yet-started (`TODO`) items, plus any plans awaiting approval — so nothing falls through the cracks.
 
 **`spec_handoff`**  
 Use when handing off work to a teammate or pausing a feature for an extended period. Compiles goals, todo status, and key code locations into a single document so the next session or developer can resume without re-scanning the codebase.
 
 **`spec_archive`**  
-Call once a feature is fully complete. Moves the feature folder to `ai-spec/archive/`, keeping `projects/` clean and limited to active work. Blocked if any todo item is still incomplete.
+Call once a feature is fully complete. Moves the feature folder to `ai-spec/archive/`, keeping `projects/` clean and limited to active work. Blocked if any todo item is still incomplete or if an archive folder with the same name already exists.
 
 **`spec_search`**  
 Use when you need to look up file locations or symbols cached in `_codebase/` without opening the files manually. Pass an optional `query` keyword to return only the matching sections. Useful for quickly finding where a class or function was last recorded.
@@ -292,7 +292,7 @@ Use when you need to look up file locations or symbols cached in `_codebase/` wi
    - `spec_handoff` generates a concise summary of goals, todo status, current progress, and key code locations
 
 8. **When a feature is complete**, archive it to keep `projects/` clean
-   - `spec_archive` moves the folder to `ai-spec/archive/` — blocked if any todo is still incomplete
+   - `spec_archive` moves the folder to `ai-spec/archive/` — blocked if any todo is still incomplete or an archive folder with the same name already exists
 
 #### 7. Generated Folder Structure
 

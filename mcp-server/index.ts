@@ -13,13 +13,15 @@ const SKILLS_DIR = path.join(KIT_ROOT, "skills");
 const RULES_DIR = path.join(KIT_ROOT, "rules");
 const SPEC_ROOT_DIR: string = process.env.SPEC_ROOT_DIR ?? "ai-spec";
 
-const fileCache = new Map<string, string>();
+interface CacheEntry { content: string; mtimeMs: number; }
+const fileCache = new Map<string, CacheEntry>();
 
 async function cachedRead(filePath: string): Promise<string> {
+  const stat = await fs.stat(filePath);
   const cached = fileCache.get(filePath);
-  if (cached !== undefined) return cached;
+  if (cached !== undefined && cached.mtimeMs === stat.mtimeMs) return cached.content;
   const content: string = await fs.readFile(filePath, "utf-8");
-  fileCache.set(filePath, content);
+  fileCache.set(filePath, { content, mtimeMs: stat.mtimeMs });
   return content;
 }
 
@@ -29,7 +31,10 @@ function buildPrefix(label: string): string {
 
 async function readSkillText(skillName: string): Promise<string> {
   const skillPath = path.join(SKILLS_DIR, skillName, "SKILL.md");
-  const content = await cachedRead(skillPath);
+  const raw = await cachedRead(skillPath);
+  const content = SPEC_ROOT_DIR !== "ai-spec"
+    ? raw.replaceAll("ai-spec/", `${SPEC_ROOT_DIR}/`)
+    : raw;
   return buildPrefix("SKILL.md") + content;
 }
 
@@ -47,6 +52,7 @@ interface TodoItem {
   id: string;
   title: string;
   done: boolean;
+  inProgress: boolean;
 }
 
 function parseTodos(content: string): TodoItem[] {
@@ -58,11 +64,13 @@ function parseTodos(content: string): TodoItem[] {
     const id = m[1];
     const title = m[2].trim();
     let done = false;
+    let inProgress = false;
     for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
       if (lines[j].startsWith("##")) break;
       if (/상태:.*\[x\]/.test(lines[j])) { done = true; break; }
+      if (/상태:.*IN PROGRESS/.test(lines[j])) { inProgress = true; break; }
     }
-    items.push({ id, title, done });
+    items.push({ id, title, done, inProgress });
   }
   return items;
 }
@@ -160,10 +168,6 @@ export function createServer() {
               prefix += `> ⚠️ **승인 게이트**: \`${todoId}\` plan.md 가 **[대기]** 상태입니다.\n> plan.md 를 검토 후 Approval Status 를 \`[승인]\` 으로 변경하거나, 채팅에 "승인" 을 입력하세요.\n> 경로: \`${rel}\`\n\n`;
               return { content: [{ type: "text" as const, text: prefix + skillText }] };
             }
-            if (status === "[수정]") {
-              prefix += `> 🔄 **수정 요청 상태**: \`${todoId}\` plan.md 에 수정 요청이 있습니다.\n> User Feedback 을 반영하여 plan.md 를 업데이트한 후 "수정 완료" 를 입력하세요.\n> 경로: \`${rel}\`\n\n`;
-              return { content: [{ type: "text" as const, text: prefix + skillText }] };
-            }
             if (status === "[승인]") {
               prefix += `> ✅ **승인 확인**: \`${todoId}\` plan.md 가 **[승인]** 상태입니다. 구현을 진행합니다.\n\n`;
               return { content: [{ type: "text" as const, text: prefix + skillText }] };
@@ -182,7 +186,10 @@ export function createServer() {
     {},
     async () => {
       const rulesPath = path.join(RULES_DIR, "spec-development-rules.md");
-      const content = await cachedRead(rulesPath);
+      const raw = await cachedRead(rulesPath);
+      const content = SPEC_ROOT_DIR !== "ai-spec"
+        ? raw.replaceAll("ai-spec/", `${SPEC_ROOT_DIR}/`)
+        : raw;
       return { content: [{ type: "text" as const, text: buildPrefix("규칙") + content }] };
     }
   );
@@ -230,29 +237,33 @@ export function createServer() {
         if (await fs.pathExists(todoPath)) {
           const todos = parseTodos(await fs.readFile(todoPath, "utf-8"));
           const done = todos.filter((t) => t.done);
-          const pending = todos.filter((t) => !t.done);
+          const inProgressItems = todos.filter((t) => !t.done && t.inProgress);
+          const waiting = todos.filter((t) => !t.done && !t.inProgress);
 
           report += `- 진행률: ${done.length}/${todos.length} 완료\n`;
-          if (pending.length > 0) {
-            report += `- 미완료: ${pending.map((t) => t.id).join(", ")}\n`;
-          }
 
-          // 모든 todo 완료 시 한 줄 요약만 표시 (plan.md 순회 생략)
-          if (pending.length === 0) {
+          if (done.length === todos.length) {
             report += `- ✅ 모든 작업 완료 (${todos.length}개)\n`;
           } else {
+            if (inProgressItems.length > 0) {
+              report += `- 진행 중: ${inProgressItems.map((t) => t.id).join(", ")}\n`;
+            }
+            if (waiting.length > 0) {
+              report += `- 대기: ${waiting.map((t) => t.id).join(", ")}\n`;
+            }
+
             const pendingApprovals: string[] = [];
-            for (const todo of pending) {
+            for (const todo of [...inProgressItems, ...waiting]) {
               const planPath = await findPlanMd(featDir, todo.id);
               if (planPath) {
                 const status = await readApprovalStatus(planPath);
-                if (status === "[대기]" || status === "[수정]") {
-                  pendingApprovals.push(`${todo.id}(${status})`);
+                if (status === "[대기]") {
+                  pendingApprovals.push(`${todo.id}(승인 대기)`);
                 }
               }
             }
             if (pendingApprovals.length > 0) {
-              report += `- 승인 대기: ${pendingApprovals.join(", ")}\n`;
+              report += `- 승인 필요: ${pendingApprovals.join(", ")}\n`;
             }
           }
         } else {
@@ -364,7 +375,17 @@ export function createServer() {
       const archiveDest = path.join(archiveDir, feature);
 
       await fs.ensureDir(archiveDir);
-      await fs.move(featDir, archiveDest, { overwrite: false });
+
+      if (await fs.pathExists(archiveDest)) {
+        return {
+          content: [{
+            type: "text" as const,
+            text: `❌ 아카이브 불가: \`${SPEC_ROOT_DIR}/archive/${feature}/\` 폴더가 이미 존재합니다.\n기존 아카이브를 삭제하거나 폴더명을 변경한 후 다시 시도하세요.`,
+          }],
+        };
+      }
+
+      await fs.move(featDir, archiveDest);
 
       return {
         content: [{
