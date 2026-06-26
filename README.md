@@ -235,7 +235,7 @@ Work on T-01 with spec_work
 | `spec_status` | Show todo progress and pending approvals across all features | `Show current spec status` |
 | `spec_handoff` | Generate a handoff document so another developer or session can resume immediately | `Create handoff doc for dashboard` |
 | `spec_archive` | Move a completed feature from `projects/` to `archive/` | `Archive the dashboard feature` |
-| `spec_search` | Return code locations and symbols from `_codebase/`; filter by keyword if `query` is provided | `Search for OrderService in codebase` |
+| `spec_search` | Return code locations and symbols from `_codebase/`; with `query` returns only matching sections, without `query` returns `index.md` + a heading TOC | `Search for OrderService in codebase` |
 
 **Tool roles and expected effects**
 
@@ -261,7 +261,7 @@ Use when handing off work to a teammate or pausing a feature for an extended per
 Call once a feature is fully complete. Moves the feature folder to `ai-spec/archive/`, keeping `projects/` clean and limited to active work. Blocked if any todo item is still incomplete or if an archive folder with the same name already exists.
 
 **`spec_search`**  
-Use when you need to look up file locations or symbols cached in `_codebase/` without opening the files manually. Pass an optional `query` keyword to return only the matching sections. Useful for quickly finding where a class or function was last recorded.
+Use when you need to look up file locations or symbols cached in `_codebase/` without opening the files manually. Pass a `query` keyword to return only the matching sections — this is the token-efficient way to use it. Calling it without a `query` returns only `index.md` plus a heading table of contents for the other wiki files (not the full dump), so you can see what exists and then query for details.
 
 #### 6. Workflow
 
@@ -340,6 +340,8 @@ ai-spec
 - `ai-spec/_codebase/` serves as the persistent codebase knowledge base. Once populated by `spec_init`, subsequent features and tasks reference it instead of re-scanning the workspace — significantly reducing token usage as the project grows.
 - When context grows too long, AI accuracy can degrade. It is recommended to start a new session for each TODO item. Pass the task number directly (e.g. `spec_work T-02`) to jump straight to that item.
 - The `_codebase/` incremental sync uses git (`git log <last-hash>..HEAD`) to re-analyze only changed files. In a non-git project (or one with no commits) the git comparison is skipped — `spec_init` falls back to judging affected modules directly or re-analyzing fully, and `last-synced.md` records the git hash as `N/A`.
+- **Token efficiency**: start a new session per TODO item (long context degrades accuracy and inflates cost), call `spec_search` with a `query` rather than dumping the whole wiki, and keep `_codebase/` entries concise and table-centric so search and discovery stay cheap as the project grows.
+- **Reusing skill context**: just like `get_rules` is fetched once per session, a skill already in context is not re-fetched. `spec_work` is the exception because it must be re-called to check the approval gate — on those re-calls pass `skill_loaded=true` so the server returns only the gate decision and omits the skill body. The bundled skills instruct the agent to do this automatically.
 
 ---
 

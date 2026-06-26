@@ -197,9 +197,14 @@ export function createServer() {
     {
       feature: z.string().optional().describe("feature 폴더명 (예: dashboard). 생략 시 AI가 목록을 확인한다."),
       todo: z.string().optional().describe("진행할 todo 번호 (예: T-01). 생략 시 첫 번째 미완료 항목을 선택한다."),
+      skill_loaded: z.boolean().optional().describe("이 세션에서 spec-work 스킬을 이미 받아 컨텍스트에 있으면 true. true 면 스킬 본문을 생략하고 승인 게이트 판정만 반환하여 토큰을 절약한다."),
     },
-    async ({ feature, todo }) => {
-      const skillText = await readSkillText("spec-work");
+    async ({ feature, todo, skill_loaded = false }) => {
+      // skill_loaded=true 면 이미 컨텍스트에 있는 스킬을 다시 싣지 않고 짧은 포인터만 반환한다.
+      // (get_rules 의 세션당 1회 규칙과 동일한 의도 — 승인 게이트 확인은 매번 필요하므로 본문만 생략)
+      const body = skill_loaded
+        ? "> ℹ️ spec-work 스킬이 이미 이 세션 컨텍스트에 있어 본문을 생략합니다. 보유한 절차(plan 작성 → 승인 → Step 5~7 구현 → 검수 → 보고)를 따르세요."
+        : await readSkillText("spec-work");
       let prefix = "";
 
       if (feature) {
@@ -235,7 +240,7 @@ export function createServer() {
 
             if (state === "approved") {
               prefix += `> ✅ **승인 확인**: \`${todoId}\` plan.md 가 **[승인]** 상태입니다. 구현을 진행합니다.\n\n`;
-              return { content: [{ type: "text" as const, text: prefix + skillText }] };
+              return { content: [{ type: "text" as const, text: prefix + body }] };
             }
 
             // pending 또는 unknown(상태 라인 누락·형식 오류) → 안전하게 구현을 차단한다.
@@ -265,7 +270,7 @@ export function createServer() {
         }
       }
 
-      return { content: [{ type: "text" as const, text: prefix + skillText }] };
+      return { content: [{ type: "text" as const, text: prefix + body }] };
     }
   );
 
@@ -487,9 +492,9 @@ export function createServer() {
 
   server.tool(
     "spec_search",
-    "ai-spec/_codebase/ 에 기록된 코드 위치·심볼·패턴을 반환한다. query 지정 시 해당 키워드가 포함된 섹션만 필터링한다.",
+    "ai-spec/_codebase/ 에 기록된 코드 위치·심볼·패턴을 반환한다. query 지정 시 해당 키워드가 포함된 섹션만 반환하고, 생략 시 index.md 본문과 나머지 위키 파일의 헤딩 목차(TOC)만 반환한다.",
     {
-      query: z.string().optional().describe("검색 키워드 (심볼명, 파일 경로 등). 생략 시 전체 위키를 반환한다."),
+      query: z.string().optional().describe("검색 키워드 (심볼명, 파일 경로 등). 생략 시 index.md + 목차만 반환한다."),
     },
     async ({ query }) => {
       const codebaseDir = path.resolve(process.cwd(), SPEC_ROOT_DIR, "_codebase");
@@ -504,11 +509,22 @@ export function createServer() {
       }
 
       if (!query) {
+        // 토큰 절약: 전체 덤프 대신 index.md 본문 + 나머지 파일의 헤딩 목차(TOC)만 반환한다.
+        // 상세 본문은 query 를 지정해 조회한다.
+        const indexPath = path.join(codebaseDir, "index.md");
         let out = "";
         for (const f of files) {
           const rel = path.relative(process.cwd(), f);
-          out += `\n\n===== ${rel} =====\n` + (await fs.readFile(f, "utf-8")).trimEnd();
+          if (f === indexPath) {
+            out += `\n\n===== ${rel} =====\n` + (await fs.readFile(f, "utf-8")).trimEnd();
+          } else {
+            const headings = splitSections(await fs.readFile(f, "utf-8"))
+              .map((s) => s.heading.trim())
+              .filter((h) => h);
+            out += `\n\n===== ${rel} (목차) =====\n` + (headings.length ? headings.join("\n") : "(헤딩 없음)");
+          }
         }
+        out += `\n\n> 상세 내용은 \`spec_search query=<키워드>\` 로 조회하세요. (예: 심볼명, 파일 경로, 모듈명)`;
         return { content: [{ type: "text" as const, text: out.trim() }] };
       }
 

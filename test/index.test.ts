@@ -88,10 +88,11 @@ describe("MCP 서버 로드 확인", () => {
 
   // ── spec_search ──────────────────────────────────────────────────────────────
 
-  it("spec_search — query 없이 호출하면 _codebase 위키 전체를 반환한다", async () => {
+  it("spec_search — query 없이 호출하면 index.md 본문과 목차를 반환한다", async () => {
     const result = await client.callTool({ name: "spec_search", arguments: {} });
     const text = (result.content[0] as { text: string }).text;
     expect(text).toContain("코드베이스");
+    expect(text).toContain("목차");
   });
 
   it("spec_search — query 매칭 시 해당 섹션을 반환한다", async () => {
@@ -184,5 +185,16 @@ describe("spec_work 승인 게이트", () => {
     const result = await client.callTool({ name: "spec_work", arguments: { feature: "noarg" } });
     const text = (result.content[0] as { text: string }).text;
     expect(text).toContain("구현 차단");
+  });
+
+  it("skill_loaded=true 면 승인 경로에서 스킬 본문을 생략한다", async () => {
+    await writeFeature("loaded", todoTodo, "[승인]");
+    const full = await client.callTool({ name: "spec_work", arguments: { feature: "loaded", todo: "T-01" } });
+    const slim = await client.callTool({ name: "spec_work", arguments: { feature: "loaded", todo: "T-01", skill_loaded: true } });
+    const fullText = (full.content[0] as { text: string }).text;
+    const slimText = (slim.content[0] as { text: string }).text;
+    expect(slimText).toContain("승인 확인");
+    expect(slimText).toContain("본문을 생략");
+    expect(slimText.length).toBeLessThan(fullText.length);
   });
 });
