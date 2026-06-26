@@ -85,21 +85,27 @@ describe("MCP 서버 로드 확인", () => {
 
   // ── spec_search ──────────────────────────────────────────────────────────────
 
-  it("spec_search — search.md 없으면 오류 메시지를 반환한다", async () => {
-    const result = await client.callTool({
-      name: "spec_search",
-      arguments: { feature: "__nonexistent__" },
-    });
+  it("spec_search — query 없이 호출하면 _codebase 위키 전체를 반환한다", async () => {
+    const result = await client.callTool({ name: "spec_search", arguments: {} });
     const text = (result.content[0] as { text: string }).text;
-    expect(text).toContain("없습니다");
+    expect(text).toContain("코드베이스");
   });
 
-  it("spec_search — query 지정 시 매칭 없으면 안내 메시지를 반환한다", async () => {
+  it("spec_search — query 매칭 시 해당 섹션을 반환한다", async () => {
     const result = await client.callTool({
       name: "spec_search",
-      arguments: { feature: "__nonexistent__", query: "SomeSymbol" },
+      arguments: { query: "프로젝트" },
     });
     const text = (result.content[0] as { text: string }).text;
-    expect(text.length).toBeGreaterThan(0);
+    expect(text).toContain("프로젝트");
+  });
+
+  it("spec_search — 매칭이 없으면 안내 메시지를 반환한다", async () => {
+    const result = await client.callTool({
+      name: "spec_search",
+      arguments: { query: "ZZ_NO_MATCH_ZZ" },
+    });
+    const text = (result.content[0] as { text: string }).text;
+    expect(text).toContain("찾지 못했습니다");
   });
 });

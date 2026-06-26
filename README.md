@@ -6,6 +6,10 @@ A centralized MCP server that provides spec-driven AI agent skills, rules, and p
 
 AI agents tend to lose context as conversations grow long. Spec-Tools-MCP solves this by keeping all decisions, requirements, and progress in markdown files — not in chat history — so any session can resume exactly where it left off.
 
+## Prerequisites
+
+[Node.js](https://nodejs.org) v18 or later (LTS recommended). The MCP server is launched via `npx`, and the codebase-wiki context hooks installed by `spec-init` run with `node`, so Node.js must be available on your `PATH`. Verify with `node -v`.
+
 ## Background
 
 Most spec-based development MCPs store their working files (`plan.md`, `todo.md`, etc.) at a fixed location in the project root. This works fine for a single developer working on one feature at a time, but breaks down quickly when:
@@ -194,7 +198,7 @@ Or call `get_rules` directly:
 get_rules
 ```
 
-If the server is connected, the AI will list the four tools (`spec_init`, `spec_todo`, `spec_work`, `get_rules`) or return the development rules document.
+If the server is connected, the AI will list the eight tools (`spec_init`, `spec_todo`, `spec_work`, `get_rules`, `spec_status`, `spec_handoff`, `spec_archive`, `spec_search`) or return the development rules document.
 
 #### 4. How to Use Skills
 
@@ -272,13 +276,14 @@ Use when you need to look up file locations or symbols cached in `_codebase/` wi
    - Reads docs and writes `requirement.md` — AI asks you to review before continuing
    - If UI changes are included, AI generates a `preview.html` mockup and opens it in a browser for review before generating tasks
    - Generates a simple task list `todo.md` (T-01, T-02, …)
+   - Tasks needing end-to-end verification (screen flows, API integration) also get a paired E2E item (e.g. `T-01E`) that runs only after its implementation task (`T-01`) is complete
    - If `requirement.md` already exists, analyzed content is appended below existing requirements
 
 4. **Run `spec_work`** to implement each task
    - AI writes `plan.md` for the selected task and asks for your approval
    - You review the plan file directly — to request changes, write your feedback in the `User Feedback` section of `plan.md`, then select `revision needed`
    - Type `approved` or `proceed` to start implementation
-   - The server enforces the approval gate: if `plan.md` is still `[pending]`, implementation is blocked at the MCP level
+   - The server enforces the approval gate: while `plan.md` is `[pending]`, `spec_work` returns a block notice instead of the implementation procedure, so no code is written until you approve
    - As the very first action when implementation starts, the agent marks the todo item `[ ] IN PROGRESS` — if the session is interrupted (e.g. token limit), the next session can detect and resume the in-progress task
    - Progress is recorded in `update.md` as each step completes
 
@@ -303,7 +308,8 @@ ai-spec
 │   ├─ last-synced.md              # last analysis timestamp (git hash + trigger)
 │   ├─ modules/
 │   │   └─ <domain>.md             # per-domain: key files, core APIs, patterns, dependencies
-│   └─ conventions.md              # shared conventions, naming rules, architecture patterns
+│   ├─ conventions.md              # shared conventions, naming rules, architecture patterns
+│   └─ gotchas.md                  # implicit constraints & gotchas (human-authored / code-verified)
 ├─ templates/                      # (optional) custom templates
 │   ├─ requirement.md              # custom requirement template
 │   └─ todo.md                     # custom todo template

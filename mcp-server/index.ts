@@ -5,13 +5,14 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import fs from "fs-extra";
 import path from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const KIT_ROOT = path.resolve(__dirname, "..");
 const SKILLS_DIR = path.join(KIT_ROOT, "skills");
 const RULES_DIR = path.join(KIT_ROOT, "rules");
 const SPEC_ROOT_DIR: string = process.env.SPEC_ROOT_DIR ?? "ai-spec";
+const PKG_VERSION: string = fs.readJsonSync(path.join(KIT_ROOT, "package.json")).version;
 
 interface CacheEntry { content: string; mtimeMs: number; }
 const fileCache = new Map<string, CacheEntry>();
@@ -115,12 +116,48 @@ async function findUpdateMd(featDir: string, todoId: string): Promise<string | n
   }
 }
 
+interface Section { heading: string; body: string; }
+
+// 마크다운 본문을 헤딩(`#`~`######`) 단위 섹션으로 분할한다.
+function splitSections(content: string): Section[] {
+  const lines = content.split("\n");
+  const sections: Section[] = [];
+  let current: Section = { heading: "", body: "" };
+  for (const line of lines) {
+    if (/^#{1,6}\s/.test(line)) {
+      if (current.heading || current.body.trim()) sections.push(current);
+      current = { heading: line, body: "" };
+    } else {
+      current.body += line + "\n";
+    }
+  }
+  if (current.heading || current.body.trim()) sections.push(current);
+  return sections;
+}
+
+// _codebase/ 위키 파일 목록을 수집한다. (index → conventions → gotchas → modules/*)
+async function collectCodebaseFiles(codebaseDir: string): Promise<string[]> {
+  const files: string[] = [];
+  for (const name of ["index.md", "conventions.md", "gotchas.md"]) {
+    const p = path.join(codebaseDir, name);
+    if (await fs.pathExists(p)) files.push(p);
+  }
+  const modulesDir = path.join(codebaseDir, "modules");
+  if (await fs.pathExists(modulesDir)) {
+    const entries = await fs.readdir(modulesDir);
+    for (const e of entries.filter((e) => e.endsWith(".md")).sort()) {
+      files.push(path.join(modulesDir, e));
+    }
+  }
+  return files;
+}
+
 // ── 서버 ──────────────────────────────────────────────────────────────────────
 
 export function createServer() {
   const server = new McpServer({
     name: "spec-tools-mcp",
-    version: "1.0.0",
+    version: PKG_VERSION,
   });
 
   // ── 기존 도구 ──────────────────────────────────────────────────────────────
@@ -158,6 +195,19 @@ export function createServer() {
         const featDir = path.join(specProjectsPath(), feature);
         if (todo) {
           const todoId = todo.toUpperCase();
+
+          // E2E 항목(T-NNE)은 대응 구현 항목(T-NN) 완료 후에만 진행한다.
+          if (/^T-\d+E$/.test(todoId)) {
+            const baseId = todoId.slice(0, -1);
+            const todoPath = path.join(featDir, "todo.md");
+            if (await fs.pathExists(todoPath)) {
+              const base = parseTodos(await fs.readFile(todoPath, "utf-8")).find((t) => t.id === baseId);
+              if (base && !base.done) {
+                prefix += `> ⚠️ **E2E 선행 조건 미충족**: \`${todoId}\` 는 \`${baseId}\` 구현이 완료된 후 진행해야 합니다. 현재 \`${baseId}\` 는 미완료 상태입니다.\n> 먼저 \`${baseId}\` 를 완료하세요.\n\n`;
+              }
+            }
+          }
+
           const planPath = await findPlanMd(featDir, todoId);
 
           if (planPath) {
@@ -165,8 +215,24 @@ export function createServer() {
             const rel = path.relative(process.cwd(), planPath);
 
             if (status === "[대기]") {
-              prefix += `> ⚠️ **승인 게이트**: \`${todoId}\` plan.md 가 **[대기]** 상태입니다.\n> plan.md 를 검토 후 Approval Status 를 \`[승인]\` 으로 변경하거나, 채팅에 "승인" 을 입력하세요.\n> 경로: \`${rel}\`\n\n`;
-              return { content: [{ type: "text" as const, text: prefix + skillText }] };
+              const block = [
+                `# ⛔ 구현 차단 — 승인 대기`,
+                ``,
+                `\`${todoId}\` 의 plan.md 가 **[대기]** 상태입니다. 승인 전에는 구현 절차가 제공되지 않으며, 어떤 구현 코드도 작성하지 않습니다.`,
+                `경로: \`${rel}\``,
+                ``,
+                `## 사용자에게 다음을 안내하세요`,
+                `- **승인**: plan.md 를 검토한 뒤 채팅에 "승인"(또는 "진행해")을 입력하거나 Approval Status 를 \`[승인]\` 으로 직접 변경`,
+                `- **수정**: plan.md 의 User Feedback 섹션에 수정 내용을 적고 "수정" 으로 응답`,
+                ``,
+                `## "수정" 응답을 받은 경우에만 수행`,
+                `1. 기존 plan.md 와 User Feedback 섹션을 읽어 수정 요청을 파악한다.`,
+                `2. plan.md 를 수정 요청에 맞게 재작성한다. (구현 코드는 작성하지 않는다)`,
+                `3. Approval Status 를 \`[대기]\` 로 유지하고 다시 승인을 요청한다.`,
+                ``,
+                `승인이 확인되면 \`spec_work feature=${feature} todo=${todoId}\` 를 다시 호출하세요. 그때 구현 절차가 제공됩니다.`,
+              ].join("\n");
+              return { content: [{ type: "text" as const, text: prefix + block }] };
             }
             if (status === "[승인]") {
               prefix += `> ✅ **승인 확인**: \`${todoId}\` plan.md 가 **[승인]** 상태입니다. 구현을 진행합니다.\n\n`;
@@ -396,8 +462,66 @@ export function createServer() {
     }
   );
 
+  server.tool(
+    "spec_search",
+    "ai-spec/_codebase/ 에 기록된 코드 위치·심볼·패턴을 반환한다. query 지정 시 해당 키워드가 포함된 섹션만 필터링한다.",
+    {
+      query: z.string().optional().describe("검색 키워드 (심볼명, 파일 경로 등). 생략 시 전체 위키를 반환한다."),
+    },
+    async ({ query }) => {
+      const codebaseDir = path.resolve(process.cwd(), SPEC_ROOT_DIR, "_codebase");
+
+      if (!(await fs.pathExists(codebaseDir))) {
+        return { content: [{ type: "text" as const, text: `❌ \`${SPEC_ROOT_DIR}/_codebase/\` 폴더를 찾을 수 없습니다. 먼저 \`spec_init\` 으로 코드베이스 위키를 생성하세요.` }] };
+      }
+
+      const files = await collectCodebaseFiles(codebaseDir);
+      if (files.length === 0) {
+        return { content: [{ type: "text" as const, text: `❌ \`${SPEC_ROOT_DIR}/_codebase/\` 에 위키 파일이 없습니다.` }] };
+      }
+
+      if (!query) {
+        let out = "";
+        for (const f of files) {
+          const rel = path.relative(process.cwd(), f);
+          out += `\n\n===== ${rel} =====\n` + (await fs.readFile(f, "utf-8")).trimEnd();
+        }
+        return { content: [{ type: "text" as const, text: out.trim() }] };
+      }
+
+      const needle = query.toLowerCase();
+      let out = "";
+      for (const f of files) {
+        const content = await fs.readFile(f, "utf-8");
+        const matched = splitSections(content).filter(
+          (s) => `${s.heading}\n${s.body}`.toLowerCase().includes(needle)
+        );
+        if (matched.length === 0) continue;
+        const rel = path.relative(process.cwd(), f);
+        out += `\n\n===== ${rel} =====\n`;
+        for (const s of matched) {
+          out += (s.heading ? `${s.heading}\n` : "") + `${s.body.trimEnd()}\n`;
+        }
+      }
+
+      if (!out.trim()) {
+        return { content: [{ type: "text" as const, text: `🔍 \`${query}\` 와 일치하는 내용을 \`${SPEC_ROOT_DIR}/_codebase/\` 에서 찾지 못했습니다.` }] };
+      }
+
+      return { content: [{ type: "text" as const, text: `🔍 \`${query}\` 검색 결과\n${out.trimEnd()}` }] };
+    }
+  );
+
   return server;
 }
 
-const transport = new StdioServerTransport();
-await createServer().connect(transport);
+export async function startServer(): Promise<void> {
+  const transport = new StdioServerTransport();
+  await createServer().connect(transport);
+}
+
+// 직접 실행(node mcp-server/index.js)일 때만 서버를 시작한다.
+// import(테스트, cli.js)로 로드될 때는 부수효과가 없도록 한다.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await startServer();
+}

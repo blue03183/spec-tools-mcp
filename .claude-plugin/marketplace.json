@@ -1,6 +1,6 @@
 {
   "name": "spec-tools-mcp-marketplace",
-  "version": "1.1.3",
+  "version": "1.3.1",
   "description": "Spec-driven toolkit for AI agents — skills, rules & prompts via MCP",
   "repository": "https://github.com/blue03183/spec-tools-mcp",
   "owner": {

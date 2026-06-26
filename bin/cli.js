@@ -87,5 +87,6 @@ if (cmd === 'init') {
 } else if (cmd === '--help' || cmd === '-h') {
   printHelp();
 } else {
-  await import('../mcp-server/index.js');
+  const { startServer } = await import('../mcp-server/index.js');
+  await startServer();
 }

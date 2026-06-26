@@ -27,6 +27,9 @@
   ],
   "license": "MIT",
   "mcpName": "io.github.blue03183/spec-tools-mcp",
+  "engines": {
+    "node": ">=18"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/blue03183/spec-tools-mcp.git"
@@ -39,7 +42,8 @@
     "build": "tsc",
     "prepare": "tsc",
     "start": "node mcp-server/index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "version": "node scripts/sync-version.js && git add .claude-plugin/plugin.json .github/plugin/plugin.json .claude-plugin/marketplace.json"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.0",
