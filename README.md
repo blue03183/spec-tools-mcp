@@ -281,9 +281,9 @@ Use when you need to look up file locations or symbols cached in `_codebase/` wi
 
 4. **Run `spec_work`** to implement each task
    - AI writes `plan.md` for the selected task and asks for your approval
-   - You review the plan file directly — to request changes, write your feedback in the `User Feedback` section of `plan.md`, then select `revision needed`
-   - Type `approved` or `proceed` to start implementation
-   - The server enforces the approval gate: while `plan.md` is `[pending]`, `spec_work` returns a block notice instead of the implementation procedure, so no code is written until you approve
+   - You review the plan file directly — to request changes, write your feedback in the `User Feedback` section of `plan.md`, then reply `수정` (revise)
+   - Reply `승인` (approve) or `진행해` (proceed), or set the `Approval Status` in `plan.md` to `[승인]` directly, to start implementation
+   - The server enforces the approval gate: unless `plan.md` shows `Approval Status` = `[승인]`, `spec_work` returns a block notice instead of the implementation procedure, so no code is written until you approve. The gate also applies when you omit the todo argument (the server resolves the active todo), and it **fails safe** — if the `Approval Status` line is missing or malformed, implementation is blocked rather than allowed
    - As the very first action when implementation starts, the agent marks the todo item `[ ] IN PROGRESS` — if the session is interrupted (e.g. token limit), the next session can detect and resume the in-progress task
    - Progress is recorded in `update.md` as each step completes
 
@@ -328,10 +328,18 @@ ai-spec
 
 **Custom templates**: Place `ai-spec/templates/requirement.md` or `ai-spec/templates/todo.md` to use your own template format instead of the built-in defaults.
 
+> **Format contract**: The `spec_status`, `spec_work`, `spec_handoff`, and `spec_archive` tools parse these files, so custom templates must preserve the parsed structure:
+> - `todo.md` — each item starts with a `## [T-NN] title` heading and includes a `상태` (status) line with `[ ] TODO`, `[ ] IN PROGRESS`, or `[x]`
+> - `plan.md` — an `Approval Status` line followed by `[대기]` (pending) or `[승인]` (approved); if missing or malformed, `spec_work` blocks implementation to fail safe
+> - `requirement.md` — keep the `## 기능 목표` (goal) heading so `spec_handoff` can extract the feature goal
+>
+> See `get_rules` → "포맷 계약 (도구 파싱 의존)" for the full contract.
+
 #### 8. Notes
 
 - `ai-spec/_codebase/` serves as the persistent codebase knowledge base. Once populated by `spec_init`, subsequent features and tasks reference it instead of re-scanning the workspace — significantly reducing token usage as the project grows.
 - When context grows too long, AI accuracy can degrade. It is recommended to start a new session for each TODO item. Pass the task number directly (e.g. `spec_work T-02`) to jump straight to that item.
+- The `_codebase/` incremental sync uses git (`git log <last-hash>..HEAD`) to re-analyze only changed files. In a non-git project (or one with no commits) the git comparison is skipped — `spec_init` falls back to judging affected modules directly or re-analyzing fully, and `last-synced.md` records the git hash as `N/A`.
 
 ---
 

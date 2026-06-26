@@ -66,10 +66,13 @@ function parseTodos(content: string): TodoItem[] {
     const title = m[2].trim();
     let done = false;
     let inProgress = false;
-    for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+    // 다음 헤딩 전까지 상태 라인을 찾는다. 라인 위치(상위 N줄)에 의존하지 않으며
+    // 대소문자·앞뒤 텍스트에 관대하게 매칭한다.
+    for (let j = i + 1; j < lines.length; j++) {
       if (lines[j].startsWith("##")) break;
-      if (/상태:.*\[x\]/.test(lines[j])) { done = true; break; }
-      if (/상태:.*IN PROGRESS/.test(lines[j])) { inProgress = true; break; }
+      if (!/상태/.test(lines[j])) continue;
+      if (/\[x\]/i.test(lines[j])) { done = true; break; }
+      if (/IN\s*PROGRESS/i.test(lines[j])) { inProgress = true; break; }
     }
     items.push({ id, title, done, inProgress });
   }
@@ -88,19 +91,27 @@ async function findPlanMd(featDir: string, todoId: string): Promise<string | nul
   }
 }
 
-async function readApprovalStatus(planPath: string): Promise<string | null> {
+type ApprovalState = "approved" | "pending" | "unknown";
+
+// plan.md 의 Approval Status 를 분류한다.
+// [승인] 포함 → approved, [대기] 포함 → pending, 그 외(라인 누락·오타·읽기 실패) → unknown.
+// unknown 은 게이트를 안전하게 차단하기 위한 상태이므로 approved 로 취급하지 않는다.
+async function readApprovalState(planPath: string): Promise<ApprovalState> {
   try {
     const lines = (await fs.readFile(planPath, "utf-8")).split("\n");
     for (let i = 0; i < lines.length; i++) {
       if (!lines[i].includes("Approval Status")) continue;
       for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
         const t = lines[j].trim();
-        if (t) return t;
+        if (!t) continue;
+        if (t.includes("[승인]")) return "approved";
+        if (t.includes("[대기]")) return "pending";
+        return "unknown";
       }
     }
-    return null;
+    return "unknown";
   } catch {
-    return null;
+    return "unknown";
   }
 }
 
@@ -193,13 +204,21 @@ export function createServer() {
 
       if (feature) {
         const featDir = path.join(specProjectsPath(), feature);
-        if (todo) {
-          const todoId = todo.toUpperCase();
+        const todoPath = path.join(featDir, "todo.md");
 
+        // todo 인자가 없으면 todo.md 에서 활성 항목(진행 중 우선, 없으면 첫 미완료)을 해석한다.
+        // 이렇게 하면 `spec_work feature=<feature>` 처럼 todo 를 생략해도 승인 게이트가 적용된다.
+        let todoId: string | null = todo ? todo.toUpperCase() : null;
+        if (!todoId && (await fs.pathExists(todoPath))) {
+          const todos = parseTodos(await fs.readFile(todoPath, "utf-8"));
+          const active = todos.find((t) => !t.done && t.inProgress) ?? todos.find((t) => !t.done);
+          if (active) todoId = active.id;
+        }
+
+        if (todoId) {
           // E2E 항목(T-NNE)은 대응 구현 항목(T-NN) 완료 후에만 진행한다.
           if (/^T-\d+E$/.test(todoId)) {
             const baseId = todoId.slice(0, -1);
-            const todoPath = path.join(featDir, "todo.md");
             if (await fs.pathExists(todoPath)) {
               const base = parseTodos(await fs.readFile(todoPath, "utf-8")).find((t) => t.id === baseId);
               if (base && !base.done) {
@@ -211,33 +230,37 @@ export function createServer() {
           const planPath = await findPlanMd(featDir, todoId);
 
           if (planPath) {
-            const status = await readApprovalStatus(planPath);
+            const state = await readApprovalState(planPath);
             const rel = path.relative(process.cwd(), planPath);
 
-            if (status === "[대기]") {
-              const block = [
-                `# ⛔ 구현 차단 — 승인 대기`,
-                ``,
-                `\`${todoId}\` 의 plan.md 가 **[대기]** 상태입니다. 승인 전에는 구현 절차가 제공되지 않으며, 어떤 구현 코드도 작성하지 않습니다.`,
-                `경로: \`${rel}\``,
-                ``,
-                `## 사용자에게 다음을 안내하세요`,
-                `- **승인**: plan.md 를 검토한 뒤 채팅에 "승인"(또는 "진행해")을 입력하거나 Approval Status 를 \`[승인]\` 으로 직접 변경`,
-                `- **수정**: plan.md 의 User Feedback 섹션에 수정 내용을 적고 "수정" 으로 응답`,
-                ``,
-                `## "수정" 응답을 받은 경우에만 수행`,
-                `1. 기존 plan.md 와 User Feedback 섹션을 읽어 수정 요청을 파악한다.`,
-                `2. plan.md 를 수정 요청에 맞게 재작성한다. (구현 코드는 작성하지 않는다)`,
-                `3. Approval Status 를 \`[대기]\` 로 유지하고 다시 승인을 요청한다.`,
-                ``,
-                `승인이 확인되면 \`spec_work feature=${feature} todo=${todoId}\` 를 다시 호출하세요. 그때 구현 절차가 제공됩니다.`,
-              ].join("\n");
-              return { content: [{ type: "text" as const, text: prefix + block }] };
-            }
-            if (status === "[승인]") {
+            if (state === "approved") {
               prefix += `> ✅ **승인 확인**: \`${todoId}\` plan.md 가 **[승인]** 상태입니다. 구현을 진행합니다.\n\n`;
               return { content: [{ type: "text" as const, text: prefix + skillText }] };
             }
+
+            // pending 또는 unknown(상태 라인 누락·형식 오류) → 안전하게 구현을 차단한다.
+            const reason =
+              state === "unknown"
+                ? `\`${todoId}\` 의 plan.md 에서 Approval Status 를 확인할 수 없습니다 (라인 누락 또는 형식 오류). 안전을 위해 구현을 차단합니다. plan.md 하단의 Approval Status 가 \`[대기]\` 또는 \`[승인]\` 형식인지 확인하세요.`
+                : `\`${todoId}\` 의 plan.md 가 **[대기]** 상태입니다. 승인 전에는 구현 절차가 제공되지 않으며, 어떤 구현 코드도 작성하지 않습니다.`;
+            const block = [
+              `# ⛔ 구현 차단 — 승인 미확인`,
+              ``,
+              reason,
+              `경로: \`${rel}\``,
+              ``,
+              `## 사용자에게 다음을 안내하세요`,
+              `- **승인**: plan.md 를 검토한 뒤 채팅에 "승인"(또는 "진행해")을 입력하거나 Approval Status 를 \`[승인]\` 으로 직접 변경`,
+              `- **수정**: plan.md 의 User Feedback 섹션에 수정 내용을 적고 "수정" 으로 응답`,
+              ``,
+              `## "수정" 응답을 받은 경우에만 수행`,
+              `1. 기존 plan.md 와 User Feedback 섹션을 읽어 수정 요청을 파악한다.`,
+              `2. plan.md 를 수정 요청에 맞게 재작성한다. (구현 코드는 작성하지 않는다)`,
+              `3. Approval Status 를 \`[대기]\` 로 유지하고 다시 승인을 요청한다.`,
+              ``,
+              `승인이 확인되면 \`spec_work feature=${feature} todo=${todoId}\` 를 다시 호출하세요. 그때 구현 절차가 제공됩니다.`,
+            ].join("\n");
+            return { content: [{ type: "text" as const, text: prefix + block }] };
           }
         }
       }
@@ -322,8 +345,8 @@ export function createServer() {
             for (const todo of [...inProgressItems, ...waiting]) {
               const planPath = await findPlanMd(featDir, todo.id);
               if (planPath) {
-                const status = await readApprovalStatus(planPath);
-                if (status === "[대기]") {
+                const state = await readApprovalState(planPath);
+                if (state === "pending") {
                   pendingApprovals.push(`${todo.id}(승인 대기)`);
                 }
               }
