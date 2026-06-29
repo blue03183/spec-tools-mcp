@@ -117,6 +117,35 @@ args = ["-y", "spec-tools-mcp@latest"]
 
 ---
 
+**Kiro**
+
+Auto-configure from your project root (requires a `.kiro` folder to already exist):
+
+```bash
+npx spec-tools-mcp init
+```
+
+This creates `.kiro/settings/mcp.json` with the server configuration. If the `.kiro` folder does not exist yet, create it first (open the project in Kiro), then run `init`.
+
+Or configure manually by creating `.kiro/settings/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "spec-tools-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "spec-tools-mcp"],
+      "env": {}
+    }
+  }
+}
+```
+
+After saving, restart Kiro or reload the MCP server from the Kiro feature panel (**MCP Servers → spec-tools-mcp → Start Server**). Verify the connection by asking: `What MCP tools are available?`
+
+---
+
 **Cursor / Other IDEs**
 
 Auto-configure from your project root:
@@ -125,7 +154,7 @@ Auto-configure from your project root:
 npx spec-tools-mcp init
 ```
 
-Detects Claude Code, Cursor, and VS Code automatically and writes the correct config file for each.
+Detects Claude Code, Cursor, VS Code, and Kiro automatically and writes the correct config file for each.
 
 Or add manually to your MCP config file:
 

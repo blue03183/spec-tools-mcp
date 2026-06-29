@@ -117,6 +117,35 @@ args = ["-y", "spec-tools-mcp@latest"]
 
 ---
 
+**Kiro**
+
+在项目根目录自动配置（需要 `.kiro` 文件夹已存在）：
+
+```bash
+npx spec-tools-mcp init
+```
+
+如果 `.kiro` 文件夹不存在，请先在 Kiro 中打开项目以创建该文件夹，然后再运行 `init`。此命令会创建 `.kiro/settings/mcp.json`。
+
+或手动创建 `.kiro/settings/mcp.json`：
+
+```json
+{
+  "mcpServers": {
+    "spec-tools-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "spec-tools-mcp"],
+      "env": {}
+    }
+  }
+}
+```
+
+保存后重启 Kiro，或从 Kiro 功能面板（**MCP 服务器 → spec-tools-mcp → 启动服务器**）手动启动服务器。通过提问"有哪些可用的 MCP 工具？"来验证连接。
+
+---
+
 **Cursor / 其他 IDE**
 
 在项目根目录自动配置：
@@ -125,7 +154,7 @@ args = ["-y", "spec-tools-mcp@latest"]
 npx spec-tools-mcp init
 ```
 
-自动检测 Claude Code、Cursor、VS Code 并为每个 IDE 生成对应的配置文件。
+自动检测 Claude Code、Cursor、VS Code 和 Kiro，并为每个 IDE 生成对应的配置文件。
 
 或手动添加到 MCP 配置文件：
 

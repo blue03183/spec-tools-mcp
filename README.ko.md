@@ -117,6 +117,35 @@ args = ["-y", "spec-tools-mcp@latest"]
 
 ---
 
+**Kiro**
+
+프로젝트 루트에서 자동 설정 (`.kiro` 폴더가 이미 존재해야 함):
+
+```bash
+npx spec-tools-mcp init
+```
+
+`.kiro` 폴더가 없다면 먼저 Kiro에서 프로젝트를 열어 폴더를 생성한 뒤 `init`을 실행하세요. `.kiro/settings/mcp.json`이 생성됩니다.
+
+또는 `.kiro/settings/mcp.json`을 직접 생성합니다:
+
+```json
+{
+  "mcpServers": {
+    "spec-tools-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "spec-tools-mcp"],
+      "env": {}
+    }
+  }
+}
+```
+
+저장 후 Kiro를 재시작하거나 Kiro 기능 패널(**MCP 서버 → spec-tools-mcp → 서버 시작**)에서 MCP 서버를 수동으로 시작하세요. `사용 가능한 MCP 도구가 뭐야?`라고 물어 연결을 확인할 수 있습니다.
+
+---
+
 **Cursor / 기타 IDE**
 
 프로젝트 루트에서 자동 설정:
@@ -125,7 +154,7 @@ args = ["-y", "spec-tools-mcp@latest"]
 npx spec-tools-mcp init
 ```
 
-Claude Code, Cursor, VS Code를 자동으로 감지하고 각각에 맞는 설정 파일을 생성합니다.
+Claude Code, Cursor, VS Code, Kiro를 자동으로 감지하고 각각에 맞는 설정 파일을 생성합니다.
 
 또는 수동으로 MCP 설정 파일에 추가:
 

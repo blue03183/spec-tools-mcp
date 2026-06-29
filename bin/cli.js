@@ -14,6 +14,13 @@ const VSCODE_SERVER_CONFIG = {
   args: ['-y', 'spec-tools-mcp'],
 };
 
+const KIRO_SERVER_CONFIG = {
+  type: 'stdio',
+  command: 'npx',
+  args: ['-y', 'spec-tools-mcp'],
+  env: {},
+};
+
 async function init() {
   const cwd = process.cwd();
   console.log('spec-tools-mcp init\n');
@@ -45,6 +52,16 @@ async function init() {
       build: () => ({ servers: { 'spec-tools-mcp': VSCODE_SERVER_CONFIG } }),
       merge: (obj) => { (obj.servers ??= {})['spec-tools-mcp'] = VSCODE_SERVER_CONFIG; return obj; },
       hasEntry: (obj) => !!obj.servers?.['spec-tools-mcp'],
+    });
+  }
+
+  if (await fs.pathExists(path.join(cwd, '.kiro'))) {
+    tasks.push({
+      label: 'Kiro',
+      file: path.join(cwd, '.kiro', 'settings', 'mcp.json'),
+      build: () => ({ mcpServers: { 'spec-tools-mcp': KIRO_SERVER_CONFIG } }),
+      merge: (obj) => { (obj.mcpServers ??= {})['spec-tools-mcp'] = KIRO_SERVER_CONFIG; return obj; },
+      hasEntry: (obj) => !!obj.mcpServers?.['spec-tools-mcp'],
     });
   }
 
